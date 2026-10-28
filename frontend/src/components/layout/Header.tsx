@@ -1,20 +1,18 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { DatasetMeta } from '../../types';
-import { ChevronRight, Database, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ChevronRight, Database } from 'lucide-react';
 
 interface HeaderProps {
   datasets: DatasetMeta[];
   activeDatasetId: string | null;
   onSelectDataset: (id: string) => void;
-  isBackendHealthy: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   datasets,
   activeDatasetId,
   onSelectDataset,
-  isBackendHealthy
 }) => {
   const location = useLocation();
 
@@ -61,18 +59,6 @@ export const Header: React.FC<HeaderProps> = ({
             </select>
           </div>
         )}
-
-        {/* Backend Connectivity Status */}
-        <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded bg-forest-50 border border-forest-200/50 text-forest-800">
-          <span className={`w-2 h-2 rounded-full ${isBackendHealthy ? 'bg-clinicsuccess' : 'bg-clinicamber'} animate-pulse`} />
-          <span className="font-medium">{isBackendHealthy ? 'API Connected' : 'Connecting...'}</span>
-        </div>
-
-        {/* Viva Badge */}
-        <div className="hidden md:flex items-center gap-1 text-[11px] font-mono text-subtext border border-lineborder rounded px-2 py-1 bg-warmbg/60">
-          <ShieldCheck className="w-3.5 h-3.5 text-forest-600" />
-          <span>DMBI CA2</span>
-        </div>
       </div>
     </header>
   );

@@ -138,7 +138,6 @@ export function AppContent() {
           datasets={datasets}
           activeDatasetId={activeDatasetId}
           onSelectDataset={selectDataset}
-          isBackendHealthy={isBackendHealthy}
         />
 
         {/* Scrollable Page Body */}
