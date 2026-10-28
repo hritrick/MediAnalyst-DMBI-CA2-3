@@ -18,12 +18,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   const getPageTitle = (path: string) => {
     switch (path) {
-      case '/': return { title: 'Overview', breadcrumb: 'Dashboard' };
+      case '/':
       case '/datasets': return { title: 'Datasets & Profiling', breadcrumb: 'Data Ingestion' };
       case '/exploration': return { title: 'Exploratory Clinical Data Analysis', breadcrumb: 'Data Exploration' };
       case '/analysis': return { title: 'Machine Learning Model Analysis', breadcrumb: 'Model Evaluation' };
       case '/reports': return { title: 'Research & Evaluation Reports', breadcrumb: 'Reports' };
-      case '/settings': return { title: 'Academic Project Settings', breadcrumb: 'Settings' };
       default: return { title: 'MediAnalytics', breadcrumb: 'Home' };
     }
   };

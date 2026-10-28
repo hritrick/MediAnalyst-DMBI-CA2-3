@@ -1,12 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard,
   Database,
   BarChart2,
   Cpu,
   FileText,
-  Settings as SettingsIcon,
   Activity,
   Heart
 } from 'lucide-react';
@@ -18,12 +16,10 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeDatasetId, activeDatasetName }) => {
   const navItems = [
-    { name: 'Overview', path: '/', icon: LayoutDashboard },
     { name: 'Datasets', path: '/datasets', icon: Database },
     { name: 'Data Exploration', path: '/exploration', icon: BarChart2 },
     { name: 'Model Analysis', path: '/analysis', icon: Cpu },
     { name: 'Reports', path: '/reports', icon: FileText },
-    { name: 'Settings', path: '/settings', icon: SettingsIcon },
   ];
 
   return (

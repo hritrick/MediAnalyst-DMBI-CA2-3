@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import {
   DatasetMeta,
   DatasetProfile,
@@ -10,12 +10,10 @@ import {
 import * as api from './services/api';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
-import { OverviewPage } from './pages/OverviewPage';
 import { DatasetsPage } from './pages/DatasetsPage';
 import { ExplorationPage } from './pages/ExplorationPage';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { ReportsPage } from './pages/ReportsPage';
-import { SettingsPage } from './pages/SettingsPage';
 
 export function AppContent() {
   const navigate = useNavigate();
@@ -143,18 +141,7 @@ export function AppContent() {
         {/* Scrollable Page Body */}
         <main className="flex-1 overflow-y-auto px-8 py-8">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <OverviewPage
-                  datasets={datasets}
-                  activeDatasetId={activeDatasetId}
-                  onSelectDataset={selectDataset}
-                  onLoadExample={handleLoadExample}
-                  isLoading={isLoadingProfile}
-                />
-              }
-            />
+            <Route path="/" element={<Navigate to="/datasets" replace />} />
             <Route
               path="/datasets"
               element={
@@ -202,7 +189,6 @@ export function AppContent() {
                 />
               }
             />
-            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
       </div>
