@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { DatasetMeta, DatasetProfile, DatasetCatalogItem } from '../types';
-import * as api from '../services/api';
+import React, { useState, useRef } from 'react';
+import { DatasetMeta, DatasetProfile } from '../types';
 import { Card } from '../components/common/Card';
 import { StatCard } from '../components/common/StatCard';
 import { Badge } from '../components/common/Badge';
@@ -8,18 +7,11 @@ import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import {
   Upload,
   Heart,
-  FileSpreadsheet,
   AlertTriangle,
-  CheckCircle2,
-  Table,
   ChevronLeft,
   ChevronRight,
   Database,
-  ExternalLink,
-  Layers,
-  Sparkles,
-  Award,
-  Check
+  FileSpreadsheet
 } from 'lucide-react';
 
 interface DatasetsPageProps {
@@ -45,24 +37,8 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [loadingCatalogId, setLoadingCatalogId] = useState<string | null>(null);
   const [previewPage, setPreviewPage] = useState(1);
   const pageSize = 10;
-
-  // Catalog items for the 5 verified datasets
-  const [catalogItems, setCatalogItems] = useState<DatasetCatalogItem[]>([]);
-
-  useEffect(() => {
-    async function fetchCatalog() {
-      try {
-        const items = await api.getDatasetCatalog();
-        setCatalogItems(items);
-      } catch (e) {
-        console.error('Failed to load catalog:', e);
-      }
-    }
-    fetchCatalog();
-  }, []);
 
   const handleFile = async (file: File) => {
     setUploadError(null);
@@ -83,18 +59,6 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
       setUploadError(err.message || 'Upload failed.');
     } finally {
       setIsUploading(false);
-    }
-  };
-
-  const handleSelectCatalogItem = async (datasetId: string) => {
-    try {
-      setLoadingCatalogId(datasetId);
-      await api.loadCatalogDataset(datasetId);
-      onSelectDataset(datasetId);
-    } catch (e: any) {
-      alert(`Failed to load dataset: ${e.message}`);
-    } finally {
-      setLoadingCatalogId(null);
     }
   };
 
@@ -125,106 +89,70 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Section 1: Verified Clinical Datasets Selector */}
-      <div className="bg-cardbg rounded-lg border border-lineborder p-6 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-lineborder/70 pb-3">
-          <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-forest-700" />
-            <h2 className="text-sm font-bold text-maintext uppercase tracking-wider">
-              Official Medical Datasets (UCI Machine Learning Repository)
-            </h2>
+      {/* Upload Zone & Cleveland Benchmark Action */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Drag and Drop Upload Box */}
+        <div
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={`md:col-span-2 bg-cardbg rounded-lg border-2 border-dashed p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center ${
+            isDragging
+              ? 'border-forest-600 bg-forest-50/50'
+              : 'border-lineborder hover:border-forest-400 hover:bg-warmbg/30'
+          }`}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            accept=".csv, .xlsx"
+            className="hidden"
+          />
+
+          <div className="w-12 h-12 rounded-full bg-forest-50 border border-forest-200/60 flex items-center justify-center text-forest-700 mb-3">
+            <Upload className="w-6 h-6" />
           </div>
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-forest-50 text-forest-800 border border-forest-200 self-start sm:self-auto">
-            5 Verified Clinical Datasets • Real Data Only
-          </span>
+
+          <h3 className="text-sm font-semibold text-maintext">
+            {isUploading ? 'Validating and Ingesting Dataset...' : 'Click to upload or drag & drop clinical file'}
+          </h3>
+          <p className="text-xs text-subtext mt-1">
+            Accepts CSV and Excel (.xlsx) medical datasets up to 50MB
+          </p>
+
+          {uploadError && (
+            <div className="mt-3 p-2 rounded bg-red-50 border border-red-200 text-xs text-clinicdanger">
+              {uploadError}
+            </div>
+          )}
         </div>
 
-        {/* Grid of the 5 Verified Datasets */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {catalogItems.map((item) => {
-            const isActive = activeDatasetId === item.id || (item.id === 'heart-disease' && activeDatasetId === 'cleveland-heart');
-            const isLoadingThis = loadingCatalogId === item.id;
-
-            return (
-              <div
-                key={item.id}
-                onClick={() => !isLoadingThis && handleSelectCatalogItem(item.id)}
-                className={`p-3.5 rounded-lg border transition-all cursor-pointer flex flex-col justify-between ${
-                  isActive
-                    ? 'border-forest-600 bg-forest-50/60 ring-1 ring-forest-600/30 shadow-sm'
-                    : 'border-lineborder bg-warmbg/30 hover:border-forest-400 hover:bg-warmbg'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white border border-lineborder text-forest-800">
-                      {item.domain.split('&')[0].trim()}
-                    </span>
-                    {isActive ? (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-forest-700">
-                        <Check className="w-3 h-3" />
-                        Active
-                      </span>
-                    ) : (
-                      item.is_dmbi_benchmark && (
-                        <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-amber-100 text-amber-800">
-                          DMBI Core
-                        </span>
-                      )
-                    )}
-                  </div>
-                  <h4 className="text-xs font-bold text-maintext leading-tight">{item.name}</h4>
-                  <p className="text-[11px] text-subtext mt-1 line-clamp-2 leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-
-                <div className="mt-3 pt-2 border-t border-lineborder/60 flex items-center justify-between text-[11px] font-mono text-subtext">
-                  <span>{item.row_count.toLocaleString()} rows</span>
-                  <span>{item.column_count} cols</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Section 2: Custom File Upload Box */}
-      <div
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        onClick={() => fileInputRef.current?.click()}
-        className={`bg-cardbg rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center ${
-          isDragging
-            ? 'border-forest-600 bg-forest-50/50'
-            : 'border-lineborder hover:border-forest-400 hover:bg-warmbg/30'
-        }`}
-      >
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-          accept=".csv, .xlsx"
-          className="hidden"
-        />
-
-        <div className="w-10 h-10 rounded-full bg-forest-50 border border-forest-200/60 flex items-center justify-center text-forest-700 mb-2">
-          <Upload className="w-5 h-5" />
-        </div>
-
-        <h3 className="text-xs font-semibold text-maintext">
-          {isUploading ? 'Validating and Ingesting Custom Dataset...' : 'Or upload your own clinical dataset (CSV / Excel)'}
-        </h3>
-        <p className="text-[11px] text-subtext mt-0.5">
-          Supports arbitrary clinical spreadsheets up to 50MB with automatic type detection and outlier screening
-        </p>
-
-        {uploadError && (
-          <div className="mt-2 p-2 rounded bg-red-50 border border-red-200 text-xs text-clinicdanger">
-            {uploadError}
+        {/* Cleveland Benchmark Card */}
+        <div className="bg-cardbg rounded-lg border border-lineborder p-6 flex flex-col justify-between shadow-sm">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Heart className="w-4 h-4 text-forest-700" />
+              <h3 className="text-xs font-semibold text-maintext uppercase tracking-wider">
+                DMBI CA2 Benchmark
+              </h3>
+            </div>
+            <h4 className="text-sm font-bold text-maintext">UCI Cleveland Heart Disease</h4>
+            <p className="text-xs text-subtext mt-1.5 leading-relaxed">
+              Instantly load the exact 303-patient cardiac dataset with 14 clinical attributes used in the project notebook.
+            </p>
           </div>
-        )}
+
+          <button
+            onClick={onLoadExample}
+            disabled={isUploading}
+            className="mt-4 w-full py-2.5 px-4 rounded-md bg-forest-700 text-white text-xs font-semibold hover:bg-forest-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <Heart className="w-3.5 h-3.5" />
+            <span>Load Cleveland Benchmark</span>
+          </button>
+        </div>
       </div>
 
       {/* Profiling View */}
@@ -426,7 +354,7 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
         <div className="p-8 text-center bg-cardbg rounded-lg border border-lineborder">
           <Database className="w-8 h-8 text-subtext mx-auto mb-2" />
           <h3 className="text-sm font-medium text-maintext">No dataset currently active</h3>
-          <p className="text-xs text-subtext mt-1">Select an official clinical dataset above or upload your own file.</p>
+          <p className="text-xs text-subtext mt-1">Click "Load Cleveland Benchmark" or upload your own clinical dataset above.</p>
         </div>
       )}
     </div>
