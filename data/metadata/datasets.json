@@ -321,56 +321,5 @@
     "status": "ready",
     "is_medical": true,
     "is_dmbi_benchmark": false
-  },
-  {
-    "id": "wine-quality",
-    "name": "Wine Quality Benchmark (Non-Medical)",
-    "domain": "General Analytics Benchmark",
-    "category": "benchmark",
-    "source": "UCI Machine Learning Repository",
-    "source_id": 186,
-    "source_url": "https://archive.ics.uci.edu/dataset/186/wine+quality",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "citation": "Cortez, P., Cerdeira, A., Almeida, F., Matos, T., & Reis, J. (2009). Modeling wine preferences by data mining from physicochemical properties. Decision Support Systems, 47(4), 547-553.",
-    "description": "6,497 samples with 11 continuous physicochemical properties (acidity, residual sugar, sulfur dioxide, pH, alcohol) evaluating sensory quality (score 3-9). Used strictly as a non-medical tabular regression benchmark.",
-    "file_format": "CSV",
-    "row_count": 6497,
-    "column_count": 13,
-    "features": [
-      "fixed_acidity",
-      "volatile_acidity",
-      "citric_acid",
-      "residual_sugar",
-      "chlorides",
-      "free_sulfur_dioxide",
-      "total_sulfur_dioxide",
-      "density",
-      "pH",
-      "sulphates",
-      "alcohol",
-      "color"
-    ],
-    "target_candidates": [
-      "quality"
-    ],
-    "default_target": "quality",
-    "target_encodings": {
-      "quality": "Continuous sensory quality score (range 3 to 9, median 6)"
-    },
-    "has_missing_values": false,
-    "missing_summary": {},
-    "suitable_tasks": [
-      "regression",
-      "clustering",
-      "eda"
-    ],
-    "supports_multiclass": false,
-    "supports_binary": false,
-    "supports_regression": true,
-    "relative_path": "data/processed/wine_quality/wine_quality.csv",
-    "sha256": "2039ae8dd2d479e8dce7be61e11590c3074bf37be25dca87b64208a0e395e454",
-    "status": "ready",
-    "is_medical": false,
-    "is_dmbi_benchmark": false
   }
 ]

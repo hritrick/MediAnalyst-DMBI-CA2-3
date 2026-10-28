@@ -29,7 +29,7 @@ def test_download_manifest_and_checksum_integrity():
     
     expected_datasets = [
         "heart_disease", "diabetes", "breast_cancer",
-        "kidney_disease", "maternal_health", "wine_quality"
+        "kidney_disease", "maternal_health"
     ]
     for name in expected_datasets:
         assert name in datasets, f"Dataset '{name}' must be in download manifest"
@@ -52,7 +52,7 @@ def test_catalog_endpoint_metadata():
     res = client.get("/api/datasets/catalog")
     assert res.status_code == 200
     catalog = res.json()
-    assert len(catalog) == 6
+    assert len(catalog) == 5
 
     catalog_map = {item["id"]: item for item in catalog}
     
@@ -89,14 +89,6 @@ def test_catalog_endpoint_metadata():
     assert mh["column_count"] == 7
     assert mh["supports_multiclass"] is True
     assert mh["default_target"] == "RiskLevel"
-
-    # Verify Wine Quality Benchmark
-    wq = catalog_map["wine-quality"]
-    assert wq["domain"] == "General Analytics Benchmark"
-    assert wq["is_medical"] is False
-    assert wq["row_count"] == 6497
-    assert wq["supports_regression"] is True
-    assert wq["default_target"] == "quality"
 
     # Verify CDC Diabetes
     diab = catalog_map["cdc-diabetes"]
@@ -222,26 +214,6 @@ def test_maternal_health_multiclass_classification():
     assert len(cm.matrix) == 3
     assert len(cm.matrix[0]) == 3
     assert res.model_results["Random Forest"].metrics["Accuracy"] > 0.60
-
-def test_wine_quality_regression_benchmark():
-    """
-    Test Wine Quality:
-    - Confirmed non-medical tabular regression benchmark.
-    - Numeric regression on 'quality'.
-    - Computes RMSE, MAE, and R2.
-    """
-    load_catalog_dataset("wine-quality")
-    req = AnalysisRequest(
-        task_type="regression",
-        target_column="quality",
-        models=["Linear Regression", "Decision Tree Regressor", "Random Forest Regressor"],
-        random_state=42
-    )
-    res = run_dataset_analysis("wine-quality", req)
-    rf = res.model_results["Random Forest Regressor"]
-    assert "RMSE" in rf.metrics
-    assert "R-squared" in rf.metrics
-    assert rf.metrics["RMSE"] < 1.0  # Reasonable prediction error on quality scale 3-9
 
 def test_cdc_diabetes_classification_and_id_handling():
     """

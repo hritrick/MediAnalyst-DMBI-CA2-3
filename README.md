@@ -22,7 +22,6 @@ All datasets integrated into MediAnalytics are **real, publicly accessible datas
 | **Breast Cancer Wisconsin (Diagnostic)** | Oncology | [UCI #17](https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic) | 569 | 32 | `Diagnosis` ('M' vs 'B') | Binary Classification, Clustering, EDA | CC BY 4.0 |
 | **Chronic Kidney Disease** | Nephrology | [UCI #336](https://archive.ics.uci.edu/dataset/336/chronic+kidney+disease) | 400 | 25 | `class` ('ckd' vs 'notckd') | Binary Classification, EDA | CC BY 4.0 |
 | **Maternal Health Risk** | Obstetrics & Maternal Care | [UCI #863](https://archive.ics.uci.edu/dataset/863/maternal+health+risk) | 1,014 | 7 | `RiskLevel` (low, mid, high) | Multiclass Classification, EDA | CC BY 4.0 |
-| **Wine Quality Benchmark** *(Non-Medical)* | General Tabular Analytics | [UCI #186](https://archive.ics.uci.edu/dataset/186/wine+quality) | 6,497 | 13 | `quality` (score 3–9) | Numeric Regression, Clustering, EDA | CC BY 4.0 |
 
 ---
 
@@ -41,15 +40,13 @@ DMBI-CA2/
 │   │   ├── diabetes/            # data.csv (253,680 survey records)
 │   │   ├── breast_cancer/       # data.csv, wdbc.data, wdbc.names
 │   │   ├── kidney_disease/      # data.csv, chronic+kidney+disease.zip
-│   │   ├── maternal_health/     # data.csv, maternal+health+risk.zip
-│   │   └── wine_quality/        # data.csv, winequality-red.csv, winequality-white.csv
+│   │   └── maternal_health/     # data.csv, maternal+health+risk.zip
 │   ├── processed/               # Cleaned versions preserving distributions & labels
 │   │   ├── heart_disease/       # cleveland_heart_disease.csv
 │   │   ├── diabetes/            # cdc_diabetes_indicators.csv
 │   │   ├── breast_cancer/       # breast_cancer_diagnostic.csv
 │   │   ├── kidney_disease/      # chronic_kidney_disease.csv
-│   │   ├── maternal_health/     # maternal_health_risk.csv
-│   │   └── wine_quality/        # wine_quality.csv
+│   │   └── maternal_health/     # maternal_health_risk.csv
 │   └── metadata/
 │       ├── datasets.json        # Central catalog metadata
 │       └── download_manifest.json # Retrieval timestamps, source URLs, SHA-256 checksums
@@ -138,9 +135,6 @@ Each dataset exhibits distinct clinical and structural characteristics handled b
   - 1,014 records across 6 vital physiological markers with a multiclass risk label (`low risk`, `mid risk`, `high risk`).
   - Raw CSV contains a UTF-8 BOM (`\ufeff`) on the `Age` header, which is stripped during ingestion.
   - Evaluated with One-vs-Rest multiclass ROC-AUC and 3x3 confusion matrices.
-- **Wine Quality Benchmark**:
-  - Included exclusively as a non-medical tabular regression benchmark.
-  - Targets continuous sensory score (3–9) using Linear Regression, Decision Tree Regressor, and Random Forest Regressor.
 
 ---
 

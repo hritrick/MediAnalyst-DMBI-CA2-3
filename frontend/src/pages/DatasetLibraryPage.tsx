@@ -81,7 +81,6 @@ export const DatasetLibraryPage: React.FC<DatasetLibraryPageProps> = ({
     { id: 'oncology', label: 'Oncology' },
     { id: 'nephrology', label: 'Nephrology' },
     { id: 'obstetrics', label: 'Obstetrics' },
-    { id: 'benchmark', label: 'General Benchmark' },
   ];
 
   const tasks = [

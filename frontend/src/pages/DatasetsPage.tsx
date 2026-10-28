@@ -144,12 +144,12 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
                 </h3>
               </div>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-forest-50 text-forest-800 border border-forest-200">
-                6 Verified
+                5 Verified
               </span>
             </div>
             <h4 className="text-sm font-bold text-maintext">UCI Medical Catalog</h4>
             <p className="text-xs text-subtext mt-1.5 leading-relaxed">
-              Access 6 verified public datasets from UCI (Heart Disease, CDC Diabetes 253k, Wisconsin Breast Cancer, Chronic Kidney Disease, Maternal Health Risk, and Wine Quality).
+              Access 5 verified clinical datasets from UCI (Heart Disease, CDC Diabetes 253k, Wisconsin Breast Cancer, Chronic Kidney Disease, and Maternal Health Risk).
             </p>
           </div>
 

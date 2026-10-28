@@ -203,28 +203,6 @@ def process_maternal_health(raw_csv_path: Path, processed_csv_path: Path) -> Dic
         ]
     }
 
-def process_wine_quality(raw_csv_path: Path, processed_csv_path: Path) -> Dict[str, Any]:
-    """
-    Wine Quality (Non-Medical Tabular Benchmark):
-    6,497 rows (Red + White), 13 columns.
-    Target: quality (3-9 continuous score for regression).
-    """
-    df = pd.read_csv(raw_csv_path)
-    df.columns = [c.strip() for c in df.columns]
-    df.to_csv(processed_csv_path, index=False)
-    
-    return {
-        "rows": len(df),
-        "cols": len(df.columns),
-        "columns": list(df.columns),
-        "target_candidates": ["quality"],
-        "target_encodings": {
-            "quality": "Continuous sensory quality score (range 3 to 9, median 6)"
-        },
-        "missing_counts": df.isnull().sum().to_dict(),
-        "notes": "Non-medical general analytics benchmark for regression evaluation."
-    }
-
 def main():
     logger.info("Starting MediAnalytics Dataset Acquisition & Verification...")
     
@@ -578,80 +556,6 @@ def main():
         })
     else:
         download_manifest["datasets"]["maternal_health"] = {"status": "failed", "error": err1}
-
-    # -------------------------------------------------------------------------
-    # 6. Wine Quality (Non-Medical Tabular Regression Benchmark)
-    # -------------------------------------------------------------------------
-    wq_raw_dir = RAW_DIR / "wine_quality"
-    wq_proc_dir = PROCESSED_DIR / "wine_quality"
-    wq_proc_dir.mkdir(parents=True, exist_ok=True)
-    
-    wq_url_csv = "https://archive.ics.uci.edu/static/public/186/data.csv"
-    wq_url_zip = "https://archive.ics.uci.edu/static/public/186/wine+quality.zip"
-    wq_raw_csv = wq_raw_dir / "data.csv"
-    wq_raw_zip = wq_raw_dir / "wine_quality.zip"
-    
-    ok1, err1 = download_file(wq_url_csv, wq_raw_csv)
-    ok2, err2 = download_file(wq_url_zip, wq_raw_zip)
-    
-    if ok2 and wq_raw_zip.exists():
-        try:
-            with zipfile.ZipFile(wq_raw_zip) as z:
-                z.extract("winequality-red.csv", wq_raw_dir)
-                z.extract("winequality-white.csv", wq_raw_dir)
-                z.extract("winequality.names", wq_raw_dir)
-        except Exception as e:
-            logger.warning(f"Could not extract wine quality zip members: {e}")
-            
-    if ok1 and wq_raw_csv.exists():
-        wq_proc_csv = wq_proc_dir / "wine_quality.csv"
-        stats = process_wine_quality(wq_raw_csv, wq_proc_csv)
-        sha_raw = sha256_file(wq_raw_csv)
-        sha_proc = sha256_file(wq_proc_csv)
-        
-        download_manifest["datasets"]["wine_quality"] = {
-            "status": "verified",
-            "source_url": wq_url_csv,
-            "raw_file": str(wq_raw_csv.relative_to(REPO_ROOT)),
-            "processed_file": str(wq_proc_csv.relative_to(REPO_ROOT)),
-            "raw_sha256": sha_raw,
-            "processed_sha256": sha_proc,
-            "file_size_bytes": wq_raw_csv.stat().st_size,
-            "retrieval_date": datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        }
-        
-        catalog_entries.append({
-            "id": "wine-quality",
-            "name": "Wine Quality Benchmark (Non-Medical)",
-            "domain": "General Analytics Benchmark",
-            "category": "benchmark",
-            "source": "UCI Machine Learning Repository",
-            "source_id": 186,
-            "source_url": "https://archive.ics.uci.edu/dataset/186/wine+quality",
-            "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-            "citation": "Cortez, P., Cerdeira, A., Almeida, F., Matos, T., & Reis, J. (2009). Modeling wine preferences by data mining from physicochemical properties. Decision Support Systems, 47(4), 547-553.",
-            "description": "6,497 samples with 11 continuous physicochemical properties (acidity, residual sugar, sulfur dioxide, pH, alcohol) evaluating sensory quality (score 3-9). Used strictly as a non-medical tabular regression benchmark.",
-            "file_format": "CSV",
-            "row_count": stats["rows"],
-            "column_count": stats["cols"],
-            "features": [c for c in stats["columns"] if c != "quality"],
-            "target_candidates": stats["target_candidates"],
-            "default_target": "quality",
-            "target_encodings": stats["target_encodings"],
-            "has_missing_values": False,
-            "missing_summary": {},
-            "suitable_tasks": ["regression", "clustering", "eda"],
-            "supports_multiclass": False,
-            "supports_binary": False,
-            "supports_regression": True,
-            "relative_path": str(wq_proc_csv.relative_to(REPO_ROOT)),
-            "sha256": sha_proc,
-            "status": "ready",
-            "is_medical": False,
-            "is_dmbi_benchmark": False
-        })
-    else:
-        download_manifest["datasets"]["wine_quality"] = {"status": "failed", "error": err1}
 
     # Write Manifest and Catalog JSON
     manifest_path = METADATA_DIR / "download_manifest.json"
