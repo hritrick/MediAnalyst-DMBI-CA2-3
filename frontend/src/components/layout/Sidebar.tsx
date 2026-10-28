@@ -6,8 +6,7 @@ import {
   Cpu,
   FileText,
   Activity,
-  Heart,
-  BookOpen
+  Heart
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -17,8 +16,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeDatasetId, activeDatasetName }) => {
   const navItems = [
-    { name: 'Dataset Library', path: '/library', icon: BookOpen },
-    { name: 'Dataset Inspector', path: '/datasets', icon: Database },
+    { name: 'Datasets', path: '/datasets', icon: Database },
     { name: 'Data Exploration', path: '/exploration', icon: BarChart2 },
     { name: 'Model Analysis', path: '/analysis', icon: Cpu },
     { name: 'Reports', path: '/reports', icon: FileText },
