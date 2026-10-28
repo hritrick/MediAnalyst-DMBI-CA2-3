@@ -7,6 +7,10 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api"
     
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
+    ROOT_DIR: Path = Path(__file__).resolve().parent.parent.parent
+    DATA_DIR: Path = ROOT_DIR / "data"
+    CATALOG_PATH: Path = DATA_DIR / "metadata" / "datasets.json"
+    MANIFEST_PATH: Path = DATA_DIR / "metadata" / "download_manifest.json"
     UPLOAD_DIR: Path = BASE_DIR / "uploads"
     SAMPLE_DATA_DIR: Path = BASE_DIR / "sample_data"
     REPORTS_DIR: Path = BASE_DIR / "reports"

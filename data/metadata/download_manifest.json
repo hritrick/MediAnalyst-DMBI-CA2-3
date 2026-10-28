@@ -1,0 +1,66 @@
+{
+  "retrieval_timestamp": "2026-10-28T16:49:00.421070+00:00",
+  "tool": "MediAnalytics Dataset Acquisition Pipeline",
+  "datasets": {
+    "heart_disease": {
+      "status": "verified",
+      "source_url": "https://archive.ics.uci.edu/static/public/45/data.csv",
+      "raw_file": "data/raw/heart_disease/data.csv",
+      "processed_file": "data/processed/heart_disease/cleveland_heart_disease.csv",
+      "raw_sha256": "868cd646a53ffbc55611192bae7496911a163937c185710f6b8aa11549b88df1",
+      "processed_sha256": "a85647682423579bed87115fdd53e7996e179d9071fbc98a1260028ec7c1f9d5",
+      "file_size_bytes": 11334,
+      "retrieval_date": "2026-10-28"
+    },
+    "diabetes": {
+      "status": "verified",
+      "source_url": "https://archive.ics.uci.edu/static/public/891/data.csv",
+      "raw_file": "data/raw/diabetes/data.csv",
+      "processed_file": "data/processed/diabetes/cdc_diabetes_indicators.csv",
+      "raw_sha256": "9f71fda9d4ae5f4878c99b9233b6a16accfa9a17c194116a6b78100540934964",
+      "processed_sha256": "c75c2d1fd66c86883e996a80977ae0eea83e1a1b56d39272c1abcea46574afcb",
+      "file_size_bytes": 13494568,
+      "retrieval_date": "2026-10-28"
+    },
+    "breast_cancer": {
+      "status": "verified",
+      "source_url": "https://archive.ics.uci.edu/static/public/17/data.csv",
+      "raw_file": "data/raw/breast_cancer/data.csv",
+      "processed_file": "data/processed/breast_cancer/breast_cancer_diagnostic.csv",
+      "raw_sha256": "3487b754ff02c93cdc8a18afafe223961d9cfbfdb932e57483e52581042767d7",
+      "processed_sha256": "422f6c34b82c0bbc32115cdf3397f8dd3d3fc183eda5e9bb6b525140acf90eab",
+      "file_size_bytes": 125031,
+      "retrieval_date": "2026-10-28"
+    },
+    "kidney_disease": {
+      "status": "verified",
+      "source_url": "https://archive.ics.uci.edu/static/public/336/data.csv",
+      "raw_file": "data/raw/kidney_disease/data.csv",
+      "processed_file": "data/processed/kidney_disease/chronic_kidney_disease.csv",
+      "raw_sha256": "0eeea8d17f5ad8792d854999d6ddf1602ec4e116616f6ccdfdaef0ba8109e694",
+      "processed_sha256": "962bc6d7026f443c6041dbe1c33416fc6d40f1953a60758b35a72a9f3124f6ed",
+      "file_size_bytes": 45092,
+      "retrieval_date": "2026-10-28"
+    },
+    "maternal_health": {
+      "status": "verified",
+      "source_url": "https://archive.ics.uci.edu/static/public/863/data.csv",
+      "raw_file": "data/raw/maternal_health/data.csv",
+      "processed_file": "data/processed/maternal_health/maternal_health_risk.csv",
+      "raw_sha256": "a1f7025719f84715096e0d1f95ae2e56b57809b9b15449e1836c96a7d976ae9b",
+      "processed_sha256": "c4341bc18c0beffb232f843a256ab4f90f7d25cdb0565e4656b4f7813765cb03",
+      "file_size_bytes": 30290,
+      "retrieval_date": "2026-10-28"
+    },
+    "wine_quality": {
+      "status": "verified",
+      "source_url": "https://archive.ics.uci.edu/static/public/186/data.csv",
+      "raw_file": "data/raw/wine_quality/data.csv",
+      "processed_file": "data/processed/wine_quality/wine_quality.csv",
+      "raw_sha256": "428bd8df7313b159988405ae5e3be6d363993d73f7ffc2adedfdc1d496508191",
+      "processed_sha256": "2039ae8dd2d479e8dce7be61e11590c3074bf37be25dca87b64208a0e395e454",
+      "file_size_bytes": 390515,
+      "retrieval_date": "2026-10-28"
+    }
+  }
+}

@@ -86,6 +86,26 @@ def build_pipeline(
             
         excluded.add(target_column)
 
+        # Prevent target leakage across related outcome columns or aliases
+        related_target_aliases = {'target', 'num', 'target_binary', 'target_bin'}
+        if target_column.lower() in related_target_aliases:
+            for alias in clean_df.columns:
+                if alias.lower() in related_target_aliases:
+                    excluded.add(alias)
+
+    # Identify and exclude identifier columns by default if not explicitly selected
+    dropped_identifiers = []
+    if not feature_columns:
+        for c in clean_df.columns:
+            if c in excluded:
+                continue
+            c_low = c.lower()
+            if c_low in ['id', 'patient_id', 'subject_id', 'mrn', 'record_id', 'uuid', 'index'] or (
+                len(clean_df) > 30 and clean_df[c].nunique(dropna=True) == len(clean_df) and not pd.api.types.is_float_dtype(clean_df[c])
+            ):
+                excluded.add(c)
+                dropped_identifiers.append(c)
+
     # Determine candidate feature columns
     if feature_columns:
         features = [c for c in feature_columns if c in clean_df.columns and c not in excluded]
@@ -185,6 +205,7 @@ def build_pipeline(
         "numeric_features": numeric_cols,
         "categorical_features": categorical_cols,
         "dropped_constant_features": dropped_constant,
+        "dropped_identifiers": dropped_identifiers,
         "class_balance": class_balance,
         "scaler_applied": scaler_type
     }

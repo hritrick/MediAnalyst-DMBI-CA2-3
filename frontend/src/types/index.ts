@@ -9,6 +9,39 @@ export interface DatasetMeta {
   notes?: string;
 }
 
+export interface DatasetCatalogItem {
+  id: string;
+  name: string;
+  domain: string;
+  category: string;
+  source: string;
+  source_id?: number | null;
+  source_url: string;
+  license?: string | null;
+  citation?: string | null;
+  description: string;
+  file_format: string;
+  row_count: number;
+  column_count: number;
+  features: string[];
+  target_candidates: string[];
+  default_target?: string | null;
+  target_encodings?: Record<string, string>;
+  identifier_columns?: string[];
+  has_missing_values: boolean;
+  missing_summary?: Record<string, number>;
+  suitable_tasks: string[];
+  supports_multiclass: boolean;
+  supports_binary: boolean;
+  supports_regression: boolean;
+  relative_path: string;
+  sha256: string;
+  status: 'ready' | 'unavailable';
+  status_reason?: string | null;
+  is_medical: boolean;
+  is_dmbi_benchmark: boolean;
+}
+
 export interface ColumnProfile {
   name: string;
   original_dtype: string;

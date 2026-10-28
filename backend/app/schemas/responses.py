@@ -11,6 +11,38 @@ class DatasetMeta(BaseModel):
     is_example: bool = False
     notes: Optional[str] = None
 
+class DatasetCatalogItem(BaseModel):
+    id: str
+    name: str
+    domain: str
+    category: str
+    source: str
+    source_id: Optional[int] = None
+    source_url: str
+    license: Optional[str] = None
+    citation: Optional[str] = None
+    description: str
+    file_format: str
+    row_count: int
+    column_count: int
+    features: List[str] = []
+    target_candidates: List[str] = []
+    default_target: Optional[str] = None
+    target_encodings: Dict[str, str] = {}
+    identifier_columns: List[str] = []
+    has_missing_values: bool = False
+    missing_summary: Dict[str, int] = {}
+    suitable_tasks: List[str] = []
+    supports_multiclass: bool = False
+    supports_binary: bool = False
+    supports_regression: bool = False
+    relative_path: str
+    sha256: str
+    status: str = "ready"
+    status_reason: Optional[str] = None
+    is_medical: bool = True
+    is_dmbi_benchmark: bool = False
+
 class ColumnProfile(BaseModel):
     name: str
     original_dtype: str

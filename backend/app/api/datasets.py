@@ -2,17 +2,28 @@ import logging
 from typing import List, Dict, Any
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.schemas.responses import (
-    DatasetMeta, DatasetProfileResponse, RecommendationsResponse
+    DatasetMeta, DatasetProfileResponse, RecommendationsResponse, DatasetCatalogItem
 )
 from app.services.loader import (
     process_and_store_upload, load_or_create_cleveland_example,
     load_metadata, list_all_datasets, load_dataset_as_dataframe
 )
+from app.services.catalog import get_dataset_catalog, load_catalog_dataset
 from app.services.profiler import profile_dataframe
 from app.services.recommender import generate_recommendations
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/datasets", tags=["Datasets"])
+
+@router.get("/catalog", response_model=List[DatasetCatalogItem])
+def get_catalog():
+    """Retrieve catalog of all verified official datasets with status."""
+    return get_dataset_catalog(include_unavailable=True)
+
+@router.post("/catalog/{dataset_id}/load", response_model=DatasetMeta)
+def load_catalog_item(dataset_id: str):
+    """Load an official verified dataset from the catalog into the active workspace."""
+    return load_catalog_dataset(dataset_id)
 
 @router.get("", response_model=List[DatasetMeta])
 def get_datasets():

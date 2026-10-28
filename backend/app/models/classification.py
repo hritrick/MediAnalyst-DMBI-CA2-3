@@ -143,6 +143,12 @@ def evaluate_classification_model(
         except Exception as e:
             logger.warning(f"Error computing ROC/PR for {model_name}: {e}")
             warnings.append(f"ROC/PR curves could not be calculated: {str(e)}")
+    elif not is_binary and y_proba is not None:
+        try:
+            # Multiclass One-vs-Rest ROC-AUC weighted by prevalence
+            roc_auc = float(roc_auc_score(y_test, y_proba, multi_class="ovr", average="weighted"))
+        except Exception as e:
+            logger.debug(f"Multiclass ROC-AUC computation skipped for {model_name}: {e}")
 
     # Confusion Matrix
     cm = confusion_matrix(y_test, y_pred)

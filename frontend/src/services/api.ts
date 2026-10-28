@@ -1,5 +1,6 @@
 import {
   DatasetMeta,
+  DatasetCatalogItem,
   DatasetProfile,
   RecommendationsResponse,
   AnalysisRequest,
@@ -17,6 +18,25 @@ export async function checkHealth(): Promise<{ status: string; version: string; 
 export async function getDatasets(): Promise<DatasetMeta[]> {
   const res = await fetch(`${API_BASE}/datasets`);
   if (!res.ok) throw new Error(`Failed to fetch datasets: ${res.statusText}`);
+  return res.json();
+}
+
+export async function getDatasetCatalog(): Promise<DatasetCatalogItem[]> {
+  const res = await fetch(`${API_BASE}/datasets/catalog`);
+  if (!res.ok) throw new Error(`Failed to fetch dataset catalog: ${res.statusText}`);
+  return res.json();
+}
+
+export async function loadCatalogDataset(datasetId: string): Promise<DatasetMeta> {
+  const res = await fetch(`${API_BASE}/datasets/catalog/${datasetId}/load`, {
+    method: 'POST',
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(errorData.detail || `Failed to load catalog dataset '${datasetId}'.`);
+  }
+
   return res.json();
 }
 

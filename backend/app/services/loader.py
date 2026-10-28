@@ -26,6 +26,16 @@ def get_dataset_path(dataset_id: str) -> Path:
     xlsx_p = settings.UPLOAD_DIR / f"{dataset_id}.xlsx"
     if xlsx_p.exists():
         return xlsx_p
+
+    # Auto-load from catalog if known catalog dataset ID
+    try:
+        from app.services.catalog import load_catalog_dataset
+        load_catalog_dataset(dataset_id)
+        if csv_p.exists():
+            return csv_p
+    except Exception:
+        pass
+
     raise HTTPException(status_code=404, detail=f"Dataset with ID '{dataset_id}' not found.")
 
 def get_metadata_path(dataset_id: str) -> Path:
@@ -38,6 +48,13 @@ def save_metadata(dataset_id: str, meta: Dict[str, Any]):
 
 def load_metadata(dataset_id: str) -> Dict[str, Any]:
     meta_path = get_metadata_path(dataset_id)
+    if not meta_path.exists():
+        # Attempt catalog auto-load
+        try:
+            from app.services.catalog import load_catalog_dataset
+            load_catalog_dataset(dataset_id)
+        except Exception:
+            pass
     if not meta_path.exists():
         raise HTTPException(status_code=404, detail=f"Metadata for dataset '{dataset_id}' not found.")
     with open(meta_path, "r", encoding="utf-8") as f:

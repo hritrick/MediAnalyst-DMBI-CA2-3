@@ -46,6 +46,9 @@ backend/uploads/*.json
 backend/analyses_storage/
 backend/reports/
 
+# Data directories (reproducible via scripts/download_datasets.py)
+data/raw/
+
 # OS
 .DS_Store
 Thumbs.db

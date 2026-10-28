@@ -12,16 +12,25 @@ def run_heart_disease_specialized_analysis(df: pd.DataFrame) -> Optional[HeartDi
     from the DMBI_CA2 Google Colab notebook for the UCI Cleveland Heart Disease dataset.
     """
     cols = [c.lower() for c in df.columns]
-    req_cols = {'age', 'chol', 'target'}
+    req_cols = {'age', 'chol'}
     if not req_cols.issubset(set(cols)):
+        return None
+
+    target_candidate = None
+    for cand in ['target', 'num', 'target_binary']:
+        if cand in cols:
+            target_candidate = cand
+            break
+            
+    if not target_candidate:
         return None
 
     # Work on a copy with lowercase columns for uniform access
     hd_df = df.copy()
     hd_df.columns = [c.lower() for c in hd_df.columns]
     
-    # Binarize target if needed: 0 = absent, >0 = present
-    hd_df['target_bin'] = (pd.to_numeric(hd_df['target'], errors='coerce').fillna(0) > 0).astype(int)
+    # Binarize target: 0 = absent, >0 = present
+    hd_df['target_bin'] = (pd.to_numeric(hd_df[target_candidate], errors='coerce').fillna(0) > 0).astype(int)
 
     # 1. Clinical Age-Cohort Discretization (Notebook Cell 7)
     bins = [0, 44, 54, 64, 100]

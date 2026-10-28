@@ -63,6 +63,9 @@ def run_dataset_analysis(dataset_id: str, req: AnalysisRequest) -> AnalysisRespo
     interpretation = ""
     clinical_rec = None
     warnings = []
+    if preprocessed.summary.get("dropped_identifiers"):
+        dropped_ids = preprocessed.summary["dropped_identifiers"]
+        warnings.append(f"Excluded identifier column(s) {dropped_ids} from predictor set to prevent identity leakage.")
 
     if req.task_type == "classification":
         model_results = train_classification_suite(

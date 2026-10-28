@@ -133,29 +133,43 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
           )}
         </div>
 
-        {/* Cleveland Benchmark Card */}
+        {/* Official Dataset Library & DMBI Benchmark Card */}
         <div className="bg-cardbg rounded-lg border border-lineborder p-6 flex flex-col justify-between shadow-sm">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Heart className="w-4 h-4 text-forest-700" />
-              <h3 className="text-xs font-semibold text-maintext uppercase tracking-wider">
-                DMBI CA2 Benchmark
-              </h3>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Heart className="w-4 h-4 text-forest-700" />
+                <h3 className="text-xs font-semibold text-maintext uppercase tracking-wider">
+                  Verified Datasets
+                </h3>
+              </div>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-forest-50 text-forest-800 border border-forest-200">
+                6 Verified
+              </span>
             </div>
-            <h4 className="text-sm font-bold text-maintext">UCI Cleveland Heart Disease</h4>
+            <h4 className="text-sm font-bold text-maintext">UCI Medical Catalog</h4>
             <p className="text-xs text-subtext mt-1.5 leading-relaxed">
-              Instantly load the exact 303-patient cardiac dataset with 14 clinical attributes used in the project notebook.
+              Access 6 verified public datasets from UCI (Heart Disease, CDC Diabetes 253k, Wisconsin Breast Cancer, Chronic Kidney Disease, Maternal Health Risk, and Wine Quality).
             </p>
           </div>
 
-          <button
-            onClick={onLoadExample}
-            disabled={isUploading}
-            className="mt-4 w-full py-2.5 px-4 rounded-md bg-forest-700 text-white text-xs font-semibold hover:bg-forest-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <Heart className="w-3.5 h-3.5" />
-            <span>Load Cleveland Benchmark</span>
-          </button>
+          <div className="space-y-2 mt-4">
+            <button
+              onClick={() => navigate('/library')}
+              className="w-full py-2 px-3 rounded-md bg-forest-700 text-white text-xs font-semibold hover:bg-forest-800 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>Browse Dataset Library</span>
+            </button>
+            <button
+              onClick={onLoadExample}
+              disabled={isUploading}
+              className="w-full py-1.5 px-3 rounded-md border border-lineborder bg-warmbg/60 text-xs font-medium text-maintext hover:bg-warmbg transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+            >
+              <Heart className="w-3 h-3 text-forest-700" />
+              <span>Quick-Load Cleveland</span>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -11,6 +11,7 @@ import * as api from './services/api';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { DatasetsPage } from './pages/DatasetsPage';
+import { DatasetLibraryPage } from './pages/DatasetLibraryPage';
 import { ExplorationPage } from './pages/ExplorationPage';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { ReportsPage } from './pages/ReportsPage';
@@ -78,6 +79,8 @@ export function AppContent() {
       ]);
       setProfile(prof);
       setRecommendations(recs);
+      const list = await api.getDatasets();
+      setDatasets(list);
     } catch (e) {
       console.error('Failed to load profile:', e);
     } finally {
@@ -141,7 +144,16 @@ export function AppContent() {
         {/* Scrollable Page Body */}
         <main className="flex-1 overflow-y-auto px-8 py-8">
           <Routes>
-            <Route path="/" element={<Navigate to="/datasets" replace />} />
+            <Route path="/" element={<Navigate to="/library" replace />} />
+            <Route
+              path="/library"
+              element={
+                <DatasetLibraryPage
+                  activeDatasetId={activeDatasetId}
+                  onSelectDataset={selectDataset}
+                />
+              }
+            />
             <Route
               path="/datasets"
               element={
