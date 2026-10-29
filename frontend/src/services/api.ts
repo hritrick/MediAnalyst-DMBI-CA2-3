@@ -25,6 +25,11 @@ clientDatasetsMap.set('cleveland-heart', {
   rawRows: CLEVELAND_PROFILE.preview_rows
 });
 
+export function getClientDatasetRows(datasetId: string): Record<string, any>[] | null {
+  const item = clientDatasetsMap.get(datasetId);
+  return item?.rawRows || null;
+}
+
 export async function checkHealth(): Promise<{ status: string; version: string; project: string }> {
   try {
     const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) });

@@ -4,7 +4,7 @@ import { AnalysisResponse, DatasetProfile } from '../types';
 import { Card } from '../components/common/Card';
 import { StatCard } from '../components/common/StatCard';
 import { EmptyState } from '../components/common/EmptyState';
-import { getPdfReportUrl, getCleanCsvExportUrl } from '../services/api';
+import { exportReportPdf, exportCleanCsv } from '../services/reportExport';
 import {
   FileText,
   Download,
@@ -14,7 +14,8 @@ import {
   FileSpreadsheet,
   Printer,
   ChevronRight,
-  Database
+  Database,
+  Loader2
 } from 'lucide-react';
 
 interface ReportsPageProps {
@@ -29,7 +30,9 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
   onLoadExample
 }) => {
   const navigate = useNavigate();
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingCsv, setIsExportingCsv] = useState(false);
+  const [exportStatus, setExportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   if (!currentAnalysis) {
     return (
@@ -47,11 +50,64 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
     window.print();
   };
 
-  const pdfUrl = getPdfReportUrl(currentAnalysis.analysis_id);
-  const csvUrl = getCleanCsvExportUrl(currentAnalysis.analysis_id);
+  const handleDownloadPdf = async () => {
+    try {
+      setIsExportingPdf(true);
+      setExportStatus(null);
+      await exportReportPdf(currentAnalysis, profile);
+      setExportStatus({ type: 'success', message: 'PDF report generated and downloaded successfully.' });
+      setTimeout(() => setExportStatus(null), 4000);
+    } catch (err: any) {
+      console.error('Failed to export PDF:', err);
+      setExportStatus({ type: 'error', message: err.message || 'Failed to export PDF report.' });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  const handleDownloadCsv = async () => {
+    try {
+      setIsExportingCsv(true);
+      setExportStatus(null);
+      await exportCleanCsv(currentAnalysis, profile);
+      setExportStatus({ type: 'success', message: 'Clean CSV dataset exported and downloaded successfully.' });
+      setTimeout(() => setExportStatus(null), 4000);
+    } catch (err: any) {
+      console.error('Failed to export CSV:', err);
+      setExportStatus({ type: 'error', message: err.message || 'Failed to export clean CSV.' });
+    } finally {
+      setIsExportingCsv(false);
+    }
+  };
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto print:p-0 print:space-y-4">
+      {/* Export Status Banner */}
+      {exportStatus && (
+        <div
+          className={`p-3.5 rounded-lg text-xs flex items-center justify-between gap-2 shadow-sm transition-all print:hidden ${
+            exportStatus.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {exportStatus.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            ) : (
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+            )}
+            <span className="font-medium">{exportStatus.message}</span>
+          </div>
+          <button
+            onClick={() => setExportStatus(null)}
+            className="text-subtext hover:text-maintext text-xs ml-4"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Action Bar */}
       <div className="bg-cardbg rounded-lg border border-lineborder p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
         <div>
@@ -69,30 +125,38 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <a
-            href={pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={`MediAnalytics_Report_${currentAnalysis.analysis_id}.pdf`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-forest-700 text-white text-xs font-semibold hover:bg-forest-800 transition-colors shadow-sm"
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isExportingPdf}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-forest-700 text-white text-xs font-semibold hover:bg-forest-800 disabled:opacity-60 transition-colors shadow-sm cursor-pointer"
+            title="Download publication-quality PDF report"
           >
-            <Download className="w-4 h-4" />
-            <span>Download Official PDF Report</span>
-          </a>
+            {isExportingPdf ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            <span>{isExportingPdf ? 'Generating PDF...' : 'Download Official PDF Report'}</span>
+          </button>
 
-          <a
-            href={csvUrl}
-            download={`clean_dataset_${currentAnalysis.dataset_id}.csv`}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-md bg-warmbg border border-lineborder text-maintext text-xs font-semibold hover:bg-forest-50/70 transition-colors"
+          <button
+            onClick={handleDownloadCsv}
+            disabled={isExportingCsv}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-md bg-warmbg border border-lineborder text-maintext text-xs font-semibold hover:bg-forest-50/70 disabled:opacity-60 transition-colors cursor-pointer"
+            title="Export clean preprocessed CSV dataset"
           >
-            <FileSpreadsheet className="w-4 h-4 text-forest-700" />
-            <span>Export Clean CSV</span>
-          </a>
+            {isExportingCsv ? (
+              <Loader2 className="w-4 h-4 animate-spin text-forest-700" />
+            ) : (
+              <FileSpreadsheet className="w-4 h-4 text-forest-700" />
+            )}
+            <span>{isExportingCsv ? 'Exporting CSV...' : 'Export Clean CSV'}</span>
+          </button>
 
           <button
             onClick={handlePrint}
-            className="p-2.5 rounded-md bg-warmbg border border-lineborder text-subtext hover:text-maintext transition-colors"
-            title="Print Report"
+            className="p-2.5 rounded-md bg-warmbg border border-lineborder text-subtext hover:text-maintext transition-colors cursor-pointer"
+            title="Print or Save as PDF"
           >
             <Printer className="w-4 h-4" />
           </button>

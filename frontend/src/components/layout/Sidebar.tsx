@@ -23,7 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeDatasetId, activeDataset
   ];
 
   return (
-    <aside className="w-64 bg-cardbg border-r border-lineborder flex flex-col justify-between shrink-0 select-none">
+    <aside className="w-64 bg-cardbg border-r border-lineborder flex flex-col justify-between shrink-0 select-none print:hidden">
       <div>
         {/* Brand Header */}
         <div className="h-16 px-6 flex items-center border-b border-lineborder gap-3">

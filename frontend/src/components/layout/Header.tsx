@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = () => {
   const { title, breadcrumb } = getPageTitle(location.pathname);
 
   return (
-    <header className="h-16 bg-cardbg border-b border-lineborder px-8 flex items-center justify-between shrink-0">
+    <header className="h-16 bg-cardbg border-b border-lineborder px-8 flex items-center justify-between shrink-0 print:hidden">
       {/* Title & Breadcrumbs */}
       <div className="flex items-center gap-3">
         <span className="text-xs font-medium text-subtext">{breadcrumb}</span>
