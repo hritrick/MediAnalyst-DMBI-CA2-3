@@ -66,9 +66,13 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
   useEffect(() => {
     if (!profile) return;
 
-    // Default target
-    const targetCand = profile.columns.find((c) => c.suggested_role === 'target_candidate');
-    const defaultTarget = targetCand ? targetCand.name : profile.columns[profile.columns.length - 1]?.name || '';
+    // Default target: Prioritize clinical disease outcomes (target, disease, diagnosis, num) over demographic binary flags like sex
+    const priorityTargets = ['target', 'target_binary', 'num', 'diagnosis', 'disease', 'outcome', 'class', 'risk'];
+    const exactTarget = profile.columns.find((c) =>
+      priorityTargets.includes(c.name.toLowerCase())
+    );
+    const targetCand = exactTarget || profile.columns.find((c) => c.suggested_role === 'target_candidate' && !['sex', 'gender'].includes(c.name.toLowerCase()));
+    const defaultTarget = exactTarget ? exactTarget.name : targetCand ? targetCand.name : profile.columns[profile.columns.length - 1]?.name || '';
     setTargetColumn(defaultTarget);
 
     // Default features: exclude constant, id, and target
@@ -81,6 +85,7 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
     if (profile.is_cleveland_heart_disease) {
       setTargetBinarize(true);
       setTaskType('classification');
+      setTargetColumn('target');
       setSelectedModels(['Logistic Regression', 'Decision Tree', 'Random Forest']);
     } else {
       setSelectedModels(['Logistic Regression', 'Decision Tree', 'Random Forest']);

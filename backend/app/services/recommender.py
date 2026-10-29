@@ -22,19 +22,26 @@ def generate_recommendations(profile: DatasetProfileResponse, df: pd.DataFrame) 
     
     # 2. Classification
     classification_targets = []
+    non_target_tokens = {'sex', 'gender', 'is_male', 'is_female', 'fbs', 'exang'}
     for c in profile.columns:
-        if c.is_constant or c.is_id:
+        if c.is_constant or c.is_id or c.name.lower() in non_target_tokens:
             continue
         # Check unique count and class sizes
         if 2 <= c.unique_count <= 10:
             classification_targets.append(c.name)
+
+    # Sort priority: target, outcome, diagnosis, disease, num first
+    priority_keys = ['target', 'target_binary', 'num', 'diagnosis', 'disease', 'outcome', 'class', 'risk']
+    classification_targets.sort(
+        key=lambda col: 0 if any(k == col.lower() or f"{k}_" in col.lower() for k in priority_keys) else 1
+    )
             
     is_class_recommended = len(classification_targets) > 0 and n_rows >= 30
     class_reason = ""
     if is_class_recommended:
         top_cand = classification_targets[0]
         class_reason = (
-            f"Found {len(classification_targets)} suitable discrete/categorical outcome candidates (e.g., '{top_cand}'). "
+            f"Primary outcome candidate identified: '{top_cand}'. "
             f"Allows predicting clinical diagnosis, presence/absence of disease, or risk stratum."
         )
     else:

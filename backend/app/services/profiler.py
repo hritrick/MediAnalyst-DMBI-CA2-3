@@ -24,15 +24,17 @@ def is_id_column(col_name: str, series: pd.Series, n_rows: int) -> bool:
 
 def is_target_candidate(col_name: str, series: pd.Series) -> bool:
     name_lower = col_name.lower()
+    # Explicitly exclude non-target demographic / clinical features that happen to have 2 unique values
+    non_target_tokens = ['sex', 'gender', 'is_male', 'is_female', 'fbs', 'exang', 'smoker', 'smoking']
+    if any(tok == name_lower or name_lower.startswith(f"{tok}_") or name_lower.endswith(f"_{tok}") for tok in non_target_tokens):
+        return False
+
     target_names = [
         'target', 'outcome', 'diagnosis', 'label', 'condition', 'disease',
         'class', 'status', 'has_disease', 'diabetes', 'risk', 'risklevel',
-        'quality', 'num'
+        'quality', 'num', 'heart_disease', 'cardiovascular'
     ]
     if any(t in name_lower for t in target_names):
-        return True
-    # Also if binary (2 unique values) and not an obvious ID/flag
-    if series.nunique(dropna=True) == 2:
         return True
     return False
 
