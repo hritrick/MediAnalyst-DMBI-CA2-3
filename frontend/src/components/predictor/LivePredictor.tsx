@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ColumnProfile, AnalysisResponse, PredictionResponse } from '../../types';
 import { predictRecord } from '../../services/api';
 import { Card } from '../common/Card';
-import { Badge } from '../common/Badge';
 import {
   Activity,
   AlertTriangle,
@@ -17,8 +16,8 @@ import {
   ChevronDown,
   Plus,
   Trash2,
-  FileCode2,
-  CornerDownRight
+  SlidersHorizontal,
+  Info
 } from 'lucide-react';
 
 interface LivePredictorProps {
@@ -108,24 +107,34 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
     analysis.best_model?.name || availableModels[0] || 'Random Forest'
   );
 
-  // Determine predictor columns from the trained analysis summary
-  const targetCol = analysis.target_column || 'target';
-  const featureCols = profile.columns.filter(
-    (c) => !c.is_id && !c.is_constant && c.name.toLowerCase() !== targetCol.toLowerCase()
+  // Exclude target and identifier columns strictly so target never appears as an input
+  const targetCol = (analysis.target_column || 'target').toLowerCase();
+  const featureCols = profile.columns.filter((c) => {
+    const cLow = c.name.toLowerCase();
+    return (
+      !c.is_id &&
+      !c.is_constant &&
+      cLow !== targetCol &&
+      !cLow.includes('target') &&
+      cLow !== 'num' &&
+      c.suggested_role !== 'target_candidate'
+    );
+  });
+
+  // Active parameter keys added by user (start with just 'age')
+  const defaultInitialParam = featureCols.find((c) => c.name.toLowerCase() === 'age')?.name || featureCols[0]?.name || '';
+  const [activeParamKeys, setActiveParamKeys] = useState<string[]>(
+    defaultInitialParam ? [defaultInitialParam] : []
   );
 
-  // Form input state initialized with dataset medians/defaults
+  // Form input state
   const [inputValues, setInputValues] = useState<Record<string, any>>({});
   const [isPredicting, setIsPredicting] = useState<boolean>(false);
   const [predictionResult, setPredictionResult] = useState<PredictionResponse | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Vercel-style "Add Parameter" state
-  const [selectedParamToAdd, setSelectedParamToAdd] = useState<string>(featureCols[0]?.name || '');
-  const [tempParamValue, setTempParamValue] = useState<string>('');
-
-  // Reset to dataset median/mode defaults
-  const resetToMedians = () => {
+  // Initialize values with dataset medians
+  const initializeDefaults = () => {
     const initial: Record<string, any> = {};
     featureCols.forEach((col) => {
       if (col.inferred_type === 'numeric') {
@@ -139,19 +148,16 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
       }
     });
     setInputValues(initial);
-    setPredictionResult(null);
-    setErrorMsg(null);
   };
 
   useEffect(() => {
-    resetToMedians();
-  }, [analysis.analysis_id]);
-
-  useEffect(() => {
-    if (featureCols.length > 0 && !selectedParamToAdd) {
-      setSelectedParamToAdd(featureCols[0].name);
+    initializeDefaults();
+    if (defaultInitialParam) {
+      setActiveParamKeys([defaultInitialParam]);
     }
-  }, [featureCols]);
+    setPredictionResult(null);
+    setErrorMsg(null);
+  }, [analysis.analysis_id]);
 
   const handleInputChange = (colName: string, value: any) => {
     setInputValues((prev) => ({
@@ -160,37 +166,51 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
     }));
   };
 
-  // Vercel Env-Variable style Add / Set action
-  const handleAddOrUpdateParam = () => {
-    if (!selectedParamToAdd) return;
-    const colProfile = featureCols.find((c) => c.name === selectedParamToAdd);
-    const parsedVal =
-      colProfile?.inferred_type === 'numeric'
-        ? parseFloat(tempParamValue) || 0
-        : tempParamValue;
-    handleInputChange(selectedParamToAdd, parsedVal);
-    setTempParamValue('');
+  // Add next parameter
+  const handleAddParameter = () => {
+    const nextCol = featureCols.find((c) => !activeParamKeys.includes(c.name));
+    if (nextCol) {
+      setActiveParamKeys([...activeParamKeys, nextCol.name]);
+    }
   };
 
-  // Quick Presets for Cleveland Heart Disease
+  // Add all remaining parameters
+  const handleAddAllParameters = () => {
+    setActiveParamKeys(featureCols.map((c) => c.name));
+  };
+
+  // Change parameter for a specific row
+  const handleChangeParamForRow = (oldKey: string, newKey: string) => {
+    if (oldKey === newKey) return;
+    setActiveParamKeys((prev) => prev.map((k) => (k === oldKey ? newKey : k)));
+  };
+
+  // Remove parameter from user's list
+  const handleRemoveParameter = (keyToRemove: string) => {
+    setActiveParamKeys((prev) => prev.filter((k) => k !== keyToRemove));
+  };
+
+  // Quick Presets
   const applyPreset = (presetType: 'high' | 'low') => {
     if (presetType === 'high') {
+      setActiveParamKeys(featureCols.map((c) => c.name));
       setInputValues({
         age: 63,
         sex: 1,
-        cp: 4, // asymptomatic angina
+        cp: 4,
         trestbps: 160,
         chol: 286,
         fbs: 1,
         restecg: 2,
-        thalach: 108, // low max heart rate
-        exang: 1, // exercise induced angina
-        oldpeak: 2.6, // elevated ST depression
+        thalach: 108,
+        exang: 1,
+        oldpeak: 2.6,
         slope: 2,
-        ca: 2, // 2 major vessels colored
-        thal: 7 // reversible defect
+        ca: 2,
+        thal: 7
       });
     } else {
+      setActiveParamKeys(featureCols.map((c) => c.name));
       setInputValues({
         age: 38,
         sex: 0,
@@ -199,12 +219,12 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
         chol: 195,
         fbs: 0,
         restecg: 0,
-        thalach: 178, // healthy elevated heart rate
+        thalach: 178,
         exang: 0,
-        oldpeak: 0.2, // minimal ST depression
+        oldpeak: 0.2,
         slope: 1,
-        ca: 0, // 0 vessels colored
-        thal: 3 // normal
+        ca: 0,
+        thal: 3
       });
     }
     setPredictionResult(null);
@@ -215,10 +235,20 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
     setIsPredicting(true);
     setErrorMsg(null);
 
+    // Any feature not in activeParamKeys automatically takes dataset median
+    const completeInputs: Record<string, any> = {};
+    featureCols.forEach((col) => {
+      if (activeParamKeys.includes(col.name) && inputValues[col.name] !== undefined) {
+        completeInputs[col.name] = inputValues[col.name];
+      } else {
+        completeInputs[col.name] = col.median_value ?? (col.top_categories?.[0]?.category ?? 0);
+      }
+    });
+
     try {
       const res = await predictRecord(analysis.analysis_id, {
         model_name: selectedModel,
-        inputs: inputValues
+        inputs: completeInputs
       });
       setPredictionResult(res);
     } catch (err: any) {
@@ -228,35 +258,29 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
     }
   };
 
-  const selectedColObj = featureCols.find((c) => c.name === selectedParamToAdd);
-  const selectedClevelandMeta = profile.is_cleveland_heart_disease ? CLEVELAND_METADATA[selectedParamToAdd] : null;
+  const unaddedCols = featureCols.filter((c) => !activeParamKeys.includes(c.name));
 
   return (
     <Card
-      title="Live Patient Risk Predictor (Vercel Environment Variable Style)"
-      subtitle={`Configure individual patient biometric parameters to predict cardiovascular heart disease probability`}
+      title="Live Patient Risk Predictor (Dynamic Parameter Builder)"
+      subtitle="Input known patient parameters one by one using dropdown selectors. Unspecified features automatically take safe dataset medians."
     >
       <div className="space-y-6">
-        {/* 1. Target Outcome Clarification Banner */}
+        {/* Target Outcome Clarification */}
         <div className="bg-forest-50/80 border border-forest-200/80 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-forest-700 flex items-center justify-center text-white shrink-0">
               <Heart className="w-5 h-5 fill-white text-forest-700" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-forest-800 uppercase tracking-widest">
-                  Target Outcome Being Predicted
-                </span>
-                <span className="px-1.5 py-0.5 rounded bg-forest-200/60 text-forest-900 text-[10px] font-mono font-bold">
-                  {targetCol}
-                </span>
-              </div>
+              <span className="text-[10px] font-bold text-forest-800 uppercase tracking-widest block">
+                Target Clinical Outcome Being Evaluated
+              </span>
               <h4 className="text-sm font-bold text-maintext">
-                Cardiovascular Disease Risk (Heart Disease: Presence [1] vs Absence [0])
+                Cardiovascular Heart Disease (Presence [1] vs Absence [0])
               </h4>
               <p className="text-[11px] text-subtext mt-0.5">
-                Note: Demographic attributes like Biological Sex (<code className="font-mono">sex</code>) are treated strictly as predictor features, not the target label.
+                Outcome is disease risk likelihood. Patient attributes (like Age, Sex, Cholesterol) are purely input predictors.
               </p>
             </div>
           </div>
@@ -277,7 +301,7 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
           </div>
         </div>
 
-        {/* 2. Quick Presets Toolbar */}
+        {/* Quick Presets Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-warmbg/40 rounded-lg border border-lineborder text-xs">
           <span className="font-semibold text-maintext">Quick Clinical Demonstration Presets:</span>
           <div className="flex flex-wrap items-center gap-2">
@@ -289,7 +313,7 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
                   className="px-3 py-1.5 rounded bg-red-50 text-red-800 border border-red-200 font-semibold hover:bg-red-100 transition-colors flex items-center gap-1.5 text-[11px]"
                 >
                   <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
-                  <span>High-Risk Cardiac Patient</span>
+                  <span>High-Risk Profile</span>
                 </button>
 
                 <button
@@ -298,166 +322,93 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
                   className="px-3 py-1.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold hover:bg-emerald-100 transition-colors flex items-center gap-1.5 text-[11px]"
                 >
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Low-Risk Healthy Baseline</span>
+                  <span>Low-Risk Profile</span>
                 </button>
               </>
             )}
 
             <button
               type="button"
-              onClick={resetToMedians}
+              onClick={() => {
+                initializeDefaults();
+                setActiveParamKeys(defaultInitialParam ? [defaultInitialParam] : []);
+                setPredictionResult(null);
+              }}
               className="px-3 py-1.5 rounded bg-cardbg text-subtext border border-lineborder hover:text-maintext hover:bg-warmbg transition-colors flex items-center gap-1.5 text-[11px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset to Dataset Medians</span>
+              <span>Reset (Start with Age Only)</span>
             </button>
           </div>
         </div>
 
-        {/* 3. Vercel-Style "Add / Quick-Set Environment Variable" Input Bar */}
-        <div className="bg-cardbg border border-lineborder rounded-lg p-4 space-y-3 shadow-xs">
-          <div className="flex items-center gap-2 text-xs font-bold text-maintext uppercase tracking-wider">
-            <Sliders className="w-4 h-4 text-forest-700" />
-            <span>Set Parameter Value (Dropdown Selector)</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            {/* Dropdown to select which parameter to edit */}
-            <div className="md:col-span-5">
-              <label className="text-[10px] font-bold text-subtext uppercase block mb-1">
-                Select Clinical Parameter (Key)
-              </label>
-              <select
-                value={selectedParamToAdd}
-                onChange={(e) => {
-                  setSelectedParamToAdd(e.target.value);
-                  setTempParamValue(String(inputValues[e.target.value] ?? ''));
-                }}
-                className="w-full text-xs bg-warmbg/40 border border-lineborder rounded px-3 py-2 text-maintext font-mono font-medium focus:outline-none focus:ring-1 focus:ring-forest-600"
-              >
-                {featureCols.map((c) => {
-                  const meta = profile.is_cleveland_heart_disease ? CLEVELAND_METADATA[c.name] : null;
-                  const label = meta?.label || c.name;
-                  const unit = meta?.unit ? ` (${meta.unit})` : '';
-                  return (
-                    <option key={c.name} value={c.name}>
-                      {c.name} — {label}{unit}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            {/* Input for the value with unit */}
-            <div className="md:col-span-5">
-              <label className="text-[10px] font-bold text-subtext uppercase block mb-1">
-                Parameter Value {selectedClevelandMeta?.unit && `[Unit: ${selectedClevelandMeta.unit}]`}
-              </label>
-
-              {selectedClevelandMeta?.options ? (
-                <select
-                  value={tempParamValue || String(inputValues[selectedParamToAdd] ?? '')}
-                  onChange={(e) => setTempParamValue(e.target.value)}
-                  className="w-full text-xs bg-warmbg/40 border border-lineborder rounded px-3 py-2 text-maintext font-mono focus:outline-none focus:ring-1 focus:ring-forest-600"
-                >
-                  <option value="">Choose category...</option>
-                  {selectedClevelandMeta.options.map((opt) => (
-                    <option key={String(opt.val)} value={String(opt.val)}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div className="relative">
-                  <input
-                    type="number"
-                    step={selectedColObj?.min_value != null && selectedColObj.min_value % 1 !== 0 ? '0.1' : '1'}
-                    placeholder={`e.g. ${selectedColObj?.median_value ?? 'Value'} (${selectedColObj?.min_value ?? ''}–${selectedColObj?.max_value ?? ''})`}
-                    value={tempParamValue}
-                    onChange={(e) => setTempParamValue(e.target.value)}
-                    className="w-full text-xs bg-warmbg/40 border border-lineborder rounded px-3 py-2 text-maintext font-mono focus:outline-none focus:ring-1 focus:ring-forest-600 pr-16"
-                  />
-                  {selectedClevelandMeta?.unit && (
-                    <span className="absolute right-3 top-2 text-[10px] text-subtext font-mono">
-                      {selectedClevelandMeta.unit}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Set / Apply Button */}
-            <div className="md:col-span-2 pt-4 md:pt-0">
-              <button
-                type="button"
-                onClick={handleAddOrUpdateParam}
-                className="w-full py-2 px-3 bg-forest-700 text-white rounded text-xs font-semibold hover:bg-forest-800 transition-colors flex items-center justify-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Set Value</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. Vercel Environment Variables Table */}
+        {/* Dynamic Parameter List Table (Vercel Env Variable Style) */}
         <div className="border border-lineborder rounded-lg overflow-hidden bg-cardbg shadow-xs">
           <div className="px-4 py-3 bg-warmbg/60 border-b border-lineborder flex items-center justify-between">
-            <span className="text-xs font-bold text-maintext uppercase tracking-wider font-mono">
-              Patient Parameter Configuration ({featureCols.length} Features Active)
-            </span>
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-forest-700" />
+              <span className="text-xs font-bold text-maintext uppercase tracking-wider font-mono">
+                Active Patient Parameters ({activeParamKeys.length} of {featureCols.length} Added)
+              </span>
+            </div>
             <span className="text-[11px] text-subtext font-mono">
-              All parameters loaded from <b className="text-maintext">{profile.filename}</b> schema
+              Unspecified parameters use cohort medians
             </span>
           </div>
 
-          <div className="overflow-x-auto max-h-96">
+          <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="sticky top-0 bg-warmbg text-subtext uppercase text-[10px] font-sans border-b border-lineborder">
+              <thead className="bg-warmbg/70 text-subtext uppercase text-[10px] font-sans border-b border-lineborder">
                 <tr>
-                  <th className="py-2.5 px-3">Parameter (Key)</th>
-                  <th className="py-2.5 px-3">Clinical Name & Unit</th>
-                  <th className="py-2.5 px-3">Input Value</th>
-                  <th className="py-2.5 px-3">Cohort Normal / Range</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                  <th className="py-2.5 px-3 w-72">Clinical Parameter (Dropdown)</th>
+                  <th className="py-2.5 px-3 w-56">Input Value & Specific Unit</th>
+                  <th className="py-2.5 px-3">Dataset Reference Range</th>
+                  <th className="py-2.5 px-3 text-right w-16">Remove</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-lineborder font-mono text-xs">
-                {featureCols.map((col) => {
+              <tbody className="divide-y divide-lineborder text-xs">
+                {activeParamKeys.map((paramKey, idx) => {
+                  const col = featureCols.find((c) => c.name === paramKey);
+                  if (!col) return null;
+
                   const clevelandMeta = profile.is_cleveland_heart_disease ? CLEVELAND_METADATA[col.name] : null;
                   const label = clevelandMeta?.label || col.name;
                   const unit = clevelandMeta?.unit || '';
                   const options = clevelandMeta?.options;
                   const currentValue = inputValues[col.name];
-                  const isModified = currentValue !== col.median_value && currentValue !== (col.top_categories?.[0]?.category);
 
                   return (
-                    <tr
-                      key={col.name}
-                      className={`hover:bg-warmbg/40 transition-colors ${
-                        isModified ? 'bg-forest-50/30' : ''
-                      }`}
-                    >
-                      {/* Key */}
-                      <td className="py-2 px-3 font-semibold text-maintext font-mono">
-                        <span className="px-1.5 py-0.5 rounded bg-warmbg border border-lineborder text-[11px]">
-                          {col.name}
-                        </span>
+                    <tr key={`${col.name}-${idx}`} className="hover:bg-warmbg/30 transition-colors">
+                      {/* Parameter Selector Dropdown */}
+                      <td className="py-2.5 px-3">
+                        <select
+                          value={col.name}
+                          onChange={(e) => handleChangeParamForRow(col.name, e.target.value)}
+                          className="w-full text-xs bg-warmbg/40 border border-lineborder rounded px-2.5 py-1.5 text-maintext font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-forest-600"
+                        >
+                          <option value={col.name}>
+                            {col.name} — {label} {unit ? `(${unit})` : ''}
+                          </option>
+                          {unaddedCols.map((otherCol) => {
+                            const otherMeta = profile.is_cleveland_heart_disease ? CLEVELAND_METADATA[otherCol.name] : null;
+                            const otherLabel = otherMeta?.label || otherCol.name;
+                            const otherUnit = otherMeta?.unit ? ` (${otherMeta.unit})` : '';
+                            return (
+                              <option key={otherCol.name} value={otherCol.name}>
+                                {otherCol.name} — {otherLabel}{otherUnit}
+                              </option>
+                            );
+                          })}
+                        </select>
                       </td>
 
-                      {/* Clinical Name & Unit */}
-                      <td className="py-2 px-3 font-sans text-subtext">
-                        <span className="text-maintext font-medium">{label}</span>
-                        {unit && <span className="ml-1 text-[10px] text-forest-800 font-mono font-bold">[{unit}]</span>}
-                      </td>
-
-                      {/* Input Value with Unit */}
-                      <td className="py-2 px-3 w-56">
+                      {/* Value Input */}
+                      <td className="py-2.5 px-3">
                         {options && options.length > 0 ? (
                           <select
                             value={currentValue !== undefined ? String(currentValue) : ''}
                             onChange={(e) => handleInputChange(col.name, e.target.value)}
-                            className="w-full text-xs bg-cardbg border border-lineborder rounded px-2 py-1 text-maintext font-mono focus:outline-none focus:ring-1 focus:ring-forest-600"
+                            className="w-full text-xs bg-cardbg border border-lineborder rounded px-2.5 py-1.5 text-maintext font-mono focus:outline-none focus:ring-1 focus:ring-forest-600"
                           >
                             {options.map((opt) => (
                               <option key={String(opt.val)} value={String(opt.val)}>
@@ -472,20 +423,25 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
                               step={col.min_value != null && col.min_value % 1 !== 0 ? '0.1' : '1'}
                               value={currentValue !== undefined ? currentValue : ''}
                               onChange={(e) => handleInputChange(col.name, e.target.value)}
-                              className="w-28 text-xs bg-cardbg border border-lineborder rounded px-2 py-1 text-maintext font-mono focus:outline-none focus:ring-1 focus:ring-forest-600"
+                              placeholder="Value"
+                              className="w-28 text-xs bg-cardbg border border-lineborder rounded px-2.5 py-1.5 text-maintext font-mono focus:outline-none focus:ring-1 focus:ring-forest-600 font-semibold"
                             />
-                            {unit && <span className="text-[10px] text-subtext font-mono">{unit}</span>}
+                            {unit && (
+                              <span className="text-[11px] font-mono font-bold text-forest-800 bg-forest-50 px-2 py-0.5 rounded border border-forest-200/60">
+                                {unit}
+                              </span>
+                            )}
                           </div>
                         )}
                       </td>
 
-                      {/* Cohort Normal / Range */}
-                      <td className="py-2 px-3 text-subtext text-[11px]">
+                      {/* Reference Range */}
+                      <td className="py-2.5 px-3 text-subtext text-[11px] font-mono">
                         {col.min_value !== undefined && col.max_value !== undefined ? (
                           <span>
                             Range: <b>{col.min_value}</b>–<b>{col.max_value}</b>{' '}
                             {col.median_value !== undefined && (
-                              <span className="text-forest-800">(Med: {col.median_value})</span>
+                              <span className="text-forest-800 font-semibold">(Cohort Median: {col.median_value})</span>
                             )}
                           </span>
                         ) : (
@@ -493,17 +449,15 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
                         )}
                       </td>
 
-                      {/* Actions */}
-                      <td className="py-2 px-3 text-right">
+                      {/* Remove Button */}
+                      <td className="py-2.5 px-3 text-right">
                         <button
                           type="button"
-                          onClick={() => {
-                            const defaultVal = col.median_value ?? col.top_categories?.[0]?.category ?? 0;
-                            handleInputChange(col.name, defaultVal);
-                          }}
-                          className="text-[10px] text-subtext hover:text-forest-700 hover:underline font-sans"
+                          onClick={() => handleRemoveParameter(col.name)}
+                          title="Remove parameter (will use cohort median)"
+                          className="p-1 rounded text-subtext hover:text-red-700 hover:bg-red-50 transition-colors"
                         >
-                          Reset
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
@@ -512,9 +466,40 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
               </tbody>
             </table>
           </div>
+
+          {/* Add Parameter Button Bar (Below the last parameter) */}
+          <div className="p-3 bg-warmbg/30 border-t border-lineborder flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={handleAddParameter}
+              disabled={unaddedCols.length === 0}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-cardbg border border-forest-600 text-forest-800 rounded-md text-xs font-bold hover:bg-forest-50 transition-colors shadow-xs disabled:opacity-40"
+            >
+              <Plus className="w-4 h-4 text-forest-700" />
+              <span>+ Add Parameter</span>
+            </button>
+
+            {unaddedCols.length > 0 && (
+              <button
+                type="button"
+                onClick={handleAddAllParameters}
+                className="text-xs text-forest-800 font-semibold hover:underline"
+              >
+                Add all remaining ({unaddedCols.length}) parameters
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* 5. Predict Action Button */}
+        {/* Informative Note for Evaluators / Viva */}
+        <div className="p-3 bg-warmbg/40 border border-lineborder rounded-md flex items-center gap-2 text-xs text-subtext">
+          <Info className="w-4 h-4 text-forest-700 shrink-0" />
+          <span>
+            <b>Professor / Examiner tip:</b> You only need to input the parameters you know or want to test. Unspecified parameters automatically adopt the dataset's verified median baseline to ensure mathematically sound model predictions.
+          </span>
+        </div>
+
+        {/* Prediction Submit Button */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
           <div className="text-xs text-subtext">
             <span>Evaluating risk for target: </span>
@@ -539,7 +524,7 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
           </div>
         )}
 
-        {/* 6. Prediction Results Banner */}
+        {/* Prediction Results Banner */}
         {predictionResult && (
           <div className="mt-6 border border-lineborder rounded-lg bg-cardbg overflow-hidden shadow-sm animate-in fade-in duration-300">
             {/* Top Risk Header */}
@@ -600,14 +585,12 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
                 </p>
               </div>
 
-              {/* Threshold Alignment Note */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-subtext font-mono pt-1">
                 <span>
-                  Predicted Diagnostic Label:{' '}
-                  <b className="text-maintext font-bold">{predictionResult.prediction_label}</b>
+                  Evaluated with {activeParamKeys.length} user-specified parameters (remaining {featureCols.length - activeParamKeys.length} defaulted to cohort medians).
                 </span>
                 <span>
-                  Evaluated Model: <b>{predictionResult.model_name}</b> (Trained on {profile.filename})
+                  Model: <b>{predictionResult.model_name}</b>
                 </span>
               </div>
             </div>
