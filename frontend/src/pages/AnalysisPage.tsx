@@ -17,6 +17,7 @@ import { ConfusionMatrixDisplay } from '../components/charts/ConfusionMatrixDisp
 import { FeatureImportanceChart } from '../components/charts/FeatureImportanceChart';
 import { DecisionTreeViewer } from '../components/charts/DecisionTreeViewer';
 import { ThresholdOptimizerViewer } from '../components/charts/ThresholdOptimizerViewer';
+import { LivePredictor } from '../components/predictor/LivePredictor';
 import {
   Cpu,
   Sliders,
@@ -563,6 +564,16 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
               </>
             );
           })()}
+
+          {/* Live Patient Risk Predictor (Interactive Clinical Inference) */}
+          <LivePredictor
+            analysis={currentAnalysis}
+            profile={{
+              columns: profile.columns,
+              filename: profile.filename,
+              is_cleveland_heart_disease: profile.is_cleveland_heart_disease
+            }}
+          />
 
           {/* Model Deep-Dive Inspector (Confusion Matrix, Tree Rules, Feature Importances) */}
           <div className="space-y-4">

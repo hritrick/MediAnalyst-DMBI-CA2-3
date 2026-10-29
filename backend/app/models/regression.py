@@ -83,8 +83,9 @@ def train_regression_suite(
     y_test: np.ndarray,
     feature_names: List[str],
     selected_models: Optional[List[str]] = None,
-    random_state: int = 42
-) -> Dict[str, ModelEvaluationResult]:
+    random_state: int = 42,
+    return_models: bool = False
+):
     
     available_models = {
         "Linear Regression": LinearRegression(),
@@ -94,11 +95,13 @@ def train_regression_suite(
     
     to_run = selected_models if selected_models else list(available_models.keys())
     results = {}
+    fitted_models = {}
     for name in to_run:
         if name in available_models:
+            model = available_models[name]
             res = evaluate_regression_model(
                 model_name=name,
-                model=available_models[name],
+                model=model,
                 X_train=X_train,
                 X_test=X_test,
                 y_train=y_train,
@@ -106,4 +109,8 @@ def train_regression_suite(
                 feature_names=feature_names
             )
             results[name] = res
+            fitted_models[name] = model
+
+    if return_models:
+        return results, fitted_models
     return results

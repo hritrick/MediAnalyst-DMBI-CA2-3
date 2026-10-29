@@ -21,3 +21,7 @@ class HeartDiseaseConfig(BaseModel):
     test_size: float = 0.20
     random_state: int = 42
     threshold_goal: float = 0.80
+
+class PredictionRequest(BaseModel):
+    model_name: Optional[str] = Field("Random Forest", description="Name of the model to use for prediction")
+    inputs: Dict[str, Any] = Field(..., description="Feature name to input value mapping")

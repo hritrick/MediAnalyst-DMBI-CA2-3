@@ -4,7 +4,9 @@ import {
   DatasetProfile,
   RecommendationsResponse,
   AnalysisRequest,
-  AnalysisResponse
+  AnalysisResponse,
+  PredictionRequest,
+  PredictionResponse
 } from '../types';
 import {
   CLEVELAND_META,
@@ -190,6 +192,19 @@ export async function getAnalysis(analysisId: string): Promise<AnalysisResponse>
     if (res.ok) return await res.json();
   } catch (e) {}
   return CLEVELAND_ANALYSIS;
+}
+
+export async function predictRecord(analysisId: string, req: PredictionRequest): Promise<PredictionResponse> {
+  const res = await fetch(`${API_BASE}/analyses/${analysisId}/predict`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req)
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || 'Prediction request failed');
+  }
+  return await res.json();
 }
 
 export function getPdfReportUrl(analysisId: string): string {

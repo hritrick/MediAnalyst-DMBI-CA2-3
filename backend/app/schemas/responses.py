@@ -162,3 +162,17 @@ class HealthResponse(BaseModel):
     version: str
     project: str
     uptime: str
+
+class PredictionResponse(BaseModel):
+    analysis_id: str
+    model_name: str
+    task_type: str
+    prediction: Any
+    prediction_label: str
+    probability: Optional[float] = None
+    probability_formatted: Optional[str] = None
+    risk_tier: Optional[str] = None  # 'High Risk', 'Moderate Risk', 'Low Risk'
+    risk_color: Optional[str] = None  # 'danger', 'warning', 'success'
+    recommendation: Optional[str] = None
+    inputs_evaluated: Dict[str, Any]
+    feature_comparisons: Optional[List[Dict[str, Any]]] = None

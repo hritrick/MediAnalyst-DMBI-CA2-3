@@ -200,6 +200,26 @@ export interface AnalysisResponse {
   heart_disease_adapter?: HeartDiseaseNotebookAdapterResults | null;
 }
 
+export interface PredictionRequest {
+  model_name?: string;
+  inputs: Record<string, any>;
+}
+
+export interface PredictionResponse {
+  analysis_id: string;
+  model_name: string;
+  task_type: string;
+  prediction: any;
+  prediction_label: string;
+  probability?: number | null;
+  probability_formatted?: string | null;
+  risk_tier?: 'High Risk' | 'Moderate Risk' | 'Low Risk' | string;
+  risk_color?: 'danger' | 'warning' | 'success' | string;
+  recommendation?: string | null;
+  inputs_evaluated: Record<string, any>;
+  feature_comparisons?: { feature: string; value: any; median: any; diff?: string }[] | null;
+}
+
 export interface AnalysisRequest {
   task_type: 'classification' | 'regression' | 'clustering';
   target_column?: string | null;

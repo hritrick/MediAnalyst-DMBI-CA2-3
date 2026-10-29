@@ -217,8 +217,9 @@ def train_classification_suite(
     selected_models: Optional[List[str]] = None,
     random_state: int = 42,
     target_labels: Optional[List[str]] = None,
-    threshold_goal: float = 0.80
-) -> Dict[str, ModelEvaluationResult]:
+    threshold_goal: float = 0.80,
+    return_models: bool = False
+):
     
     available_models = {
         "Logistic Regression": LogisticRegression(max_iter=1000, random_state=random_state),
@@ -229,6 +230,7 @@ def train_classification_suite(
     to_run = selected_models if selected_models else list(available_models.keys())
     
     results = {}
+    fitted_models = {}
     for name in to_run:
         if name in available_models:
             model = available_models[name]
@@ -244,5 +246,8 @@ def train_classification_suite(
                 threshold_goal=threshold_goal
             )
             results[name] = res
+            fitted_models[name] = model
             
+    if return_models:
+        return results, fitted_models
     return results

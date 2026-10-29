@@ -201,6 +201,7 @@ def build_pipeline(
         "train_samples": int(X_train_trans.shape[0]),
         "test_samples": int(X_test_trans.shape[0]),
         "original_features": len(valid_features),
+        "feature_columns": valid_features,
         "engineered_features": int(X_train_trans.shape[1]),
         "numeric_features": numeric_cols,
         "categorical_features": categorical_cols,
