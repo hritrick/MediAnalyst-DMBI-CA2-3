@@ -62,6 +62,7 @@ class ColumnProfile(BaseModel):
     median_value: Optional[float] = None
     skewness: Optional[float] = None
     top_categories: Optional[List[Dict[str, Any]]] = None
+    histogram: Optional[List[Dict[str, Any]]] = None
 
 class OutlierSummary(BaseModel):
     column: str

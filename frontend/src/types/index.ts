@@ -61,6 +61,7 @@ export interface ColumnProfile {
   median_value?: number | null;
   skewness?: number | null;
   top_categories?: { category: string; count: number; percentage: number }[] | null;
+  histogram?: { binLabel: string; count: number; start?: number; end?: number }[] | null;
 }
 
 export interface OutlierSummary {

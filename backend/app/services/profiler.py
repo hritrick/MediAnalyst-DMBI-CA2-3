@@ -134,10 +134,11 @@ def profile_dataframe(df: pd.DataFrame, dataset_id: str, filename: str) -> Datas
                 for k, v in vc.items()
             ]
             
-        # Outlier calculation for continuous numeric columns
-        if is_numeric and unique_c > 10:
+        # Outlier calculation & full-dataset histogram for continuous numeric columns
+        hist_bins = None
+        if is_numeric and not s.dropna().empty:
             clean_s = s.dropna()
-            if len(clean_s) >= 10:
+            if len(clean_s) >= 10 and unique_c > 10:
                 q1 = float(clean_s.quantile(0.25))
                 q3 = float(clean_s.quantile(0.75))
                 iqr = q3 - q1
@@ -153,6 +154,31 @@ def profile_dataframe(df: pd.DataFrame, dataset_id: str, filename: str) -> Datas
                         upper_bound=round(upper, 2),
                         outlier_values=[float(x) for x in outliers.head(10).tolist()]
                     ))
+
+            # Full-dataset histogram bins
+            if unique_c == 2:
+                vc = clean_s.value_counts().sort_index()
+                hist_bins = [
+                    {
+                        "binLabel": str(int(k) if isinstance(k, (int, np.integer)) or float(k).is_integer() else k),
+                        "count": int(v),
+                        "start": float(k),
+                        "end": float(k)
+                    }
+                    for k, v in vc.items()
+                ]
+            else:
+                n_bins = min(10, max(5, int(np.sqrt(min(len(clean_s), 100)))))
+                counts, bin_edges = np.histogram(clean_s, bins=n_bins)
+                hist_bins = [
+                    {
+                        "binLabel": f"{int(bin_edges[i]) if float(bin_edges[i]).is_integer() else round(float(bin_edges[i]), 1)} - {int(bin_edges[i+1]) if float(bin_edges[i+1]).is_integer() else round(float(bin_edges[i+1]), 1)}",
+                        "count": int(counts[i]),
+                        "start": round(float(bin_edges[i]), 2),
+                        "end": round(float(bin_edges[i+1]), 2)
+                    }
+                    for i in range(len(counts))
+                ]
 
         col_profiles.append(ColumnProfile(
             name=col,
@@ -172,7 +198,8 @@ def profile_dataframe(df: pd.DataFrame, dataset_id: str, filename: str) -> Datas
             std_value=round(std_v, 3) if std_v is not None else None,
             median_value=round(median_v, 3) if median_v is not None else None,
             skewness=round(skew_v, 3) if skew_v is not None else None,
-            top_categories=top_cats
+            top_categories=top_cats,
+            histogram=hist_bins
         ))
 
     num_count = sum(1 for c in col_profiles if c.inferred_type in ["numeric", "binary"])
@@ -199,9 +226,9 @@ def profile_dataframe(df: pd.DataFrame, dataset_id: str, filename: str) -> Datas
         for k, v in row.items():
             if pd.isna(v):
                 clean_row[k] = None
-            elif isinstance(v, (np.integer, np.int64)):
+            elif isinstance(v, (int, np.integer, np.int64)):
                 clean_row[k] = int(v)
-            elif isinstance(v, (np.floating, np.float64)):
+            elif isinstance(v, (float, np.floating, np.float64)):
                 clean_row[k] = round(float(v), 4)
             else:
                 clean_row[k] = str(v)
