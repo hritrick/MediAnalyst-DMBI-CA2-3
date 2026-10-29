@@ -516,40 +516,53 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
           </Card>
 
           {/* Metric Comparison Bar Chart */}
-          <Card
-            title="Empirical Metric Comparison"
-            subtitle="Comparing Accuracy, Precision, Recall, F1, and ROC-AUC across models"
-          >
-            <BarMetricChart
-              data={currentAnalysis.comparison_table}
-              metrics={
-                taskType === 'classification'
-                  ? ['Accuracy', 'Precision', 'Recall', 'F1-score', 'ROC-AUC']
-                  : taskType === 'regression'
-                  ? ['RMSE', 'MAE', 'R-squared']
-                  : ['Silhouette Score', 'Davies-Bouldin Index']
-              }
-            />
-          </Card>
+          {(() => {
+            const executedTask = currentAnalysis.task_type || taskType;
+            return (
+              <>
+                <Card
+                  title="Empirical Metric Comparison"
+                  subtitle={
+                    executedTask === 'classification'
+                      ? "Comparing Accuracy, Precision, Recall, F1, and ROC-AUC across models"
+                      : executedTask === 'regression'
+                      ? "Comparing RMSE, MAE, and R-squared across models"
+                      : "Comparing Silhouette Score and Davies-Bouldin Index across clustering algorithms"
+                  }
+                >
+                  <BarMetricChart
+                    data={currentAnalysis.comparison_table}
+                    metrics={
+                      executedTask === 'classification'
+                        ? ['Accuracy', 'Precision', 'Recall', 'F1-score', 'ROC-AUC']
+                        : executedTask === 'regression'
+                        ? ['RMSE', 'MAE', 'R-squared']
+                        : ['Silhouette Score', 'Davies-Bouldin Index']
+                    }
+                  />
+                </Card>
 
-          {/* Classification Specific Diagnostic Curves */}
-          {taskType === 'classification' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card
-                title="Receiver Operating Characteristic (ROC)"
-                subtitle="True Positive Rate vs False Positive Rate trade-off across varying decision cutoffs"
-              >
-                <RocCurveChart models={currentAnalysis.model_results} />
-              </Card>
+                {/* Classification Specific Diagnostic Curves */}
+                {executedTask === 'classification' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card
+                      title="Receiver Operating Characteristic (ROC)"
+                      subtitle="True Positive Rate vs False Positive Rate trade-off across varying decision cutoffs"
+                    >
+                      <RocCurveChart models={currentAnalysis.model_results} />
+                    </Card>
 
-              <Card
-                title="Precision-Recall Curve"
-                subtitle="Precision vs Sensitivity curve (especially critical for clinical class imbalance)"
-              >
-                <PrecisionRecallChart models={currentAnalysis.model_results} />
-              </Card>
-            </div>
-          )}
+                    <Card
+                      title="Precision-Recall Curve"
+                      subtitle="Precision vs Sensitivity curve (especially critical for clinical class imbalance)"
+                    >
+                      <PrecisionRecallChart models={currentAnalysis.model_results} />
+                    </Card>
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           {/* Model Deep-Dive Inspector (Confusion Matrix, Tree Rules, Feature Importances) */}
           <div className="space-y-4">
