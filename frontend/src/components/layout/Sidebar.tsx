@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Database,
+  Library,
   BarChart2,
   Cpu,
   FileText,
@@ -16,6 +17,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeDatasetId, activeDatasetName }) => {
   const navItems = [
+    { name: 'Dataset Library', path: '/library', icon: Library },
     { name: 'Datasets', path: '/datasets', icon: Database },
     { name: 'Data Exploration', path: '/exploration', icon: BarChart2 },
     { name: 'Model Analysis', path: '/analysis', icon: Cpu },

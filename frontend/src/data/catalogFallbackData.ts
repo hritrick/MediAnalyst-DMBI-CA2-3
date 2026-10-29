@@ -1,0 +1,193 @@
+import { DatasetCatalogItem } from '../types';
+
+export const OFFICIAL_CATALOG_DATA: DatasetCatalogItem[] = [
+  {
+    id: 'heart-disease',
+    name: 'UCI Cleveland Heart Disease',
+    domain: 'Cardiology',
+    category: 'cardiology',
+    source: 'UCI Machine Learning Repository',
+    source_id: 45,
+    source_url: 'https://archive.ics.uci.edu/dataset/45/heart+disease',
+    license: 'Creative Commons Attribution 4.0 International (CC BY 4.0)',
+    citation: 'Detrano, R., et al. (1989). International application of a new probability algorithm for the diagnosis of coronary artery disease. Am J Cardiol, 64(5), 304-310.',
+    description: 'Gold-standard cardiovascular benchmark tracking 14 clinical markers across 303 cardiac patients at Cleveland Clinic Foundation. Serves as the primary reference dataset for the DMBI CA2 notebook.',
+    file_format: 'CSV',
+    row_count: 303,
+    column_count: 16,
+    features: [
+      'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs',
+      'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal'
+    ],
+    target_candidates: ['num', 'target', 'target_binary'],
+    default_target: 'target_binary',
+    target_encodings: {
+      'num': '0=No disease, 1=Mild, 2=Moderate, 3=Severe, 4=Critical',
+      'target': 'Preserved original 0-4 multiclass severity',
+      'target_binary': '0=Absence (<50% stenosis), 1=Presence (>=50% stenosis)'
+    },
+    has_missing_values: true,
+    missing_summary: { ca: 4, thal: 2 },
+    suitable_tasks: ['classification', 'eda'],
+    supports_multiclass: true,
+    supports_binary: true,
+    supports_regression: false,
+    relative_path: 'data/processed/heart_disease/cleveland_heart_disease.csv',
+    sha256: 'a85647682423579bed87115fdd53e7996e179d9071fbc98a1260028ec7c1f9d5',
+    status: 'ready',
+    is_medical: true,
+    is_dmbi_benchmark: true
+  },
+  {
+    id: 'cdc-diabetes',
+    name: 'CDC Diabetes Health Indicators',
+    domain: 'Endocrinology & Epidemiology',
+    category: 'endocrinology',
+    source: 'UCI Machine Learning Repository / CDC BRFSS',
+    source_id: 891,
+    source_url: 'https://archive.ics.uci.edu/dataset/891/cdc+diabetes+health+indicators',
+    license: 'Creative Commons Attribution 4.0 International (CC BY 4.0)',
+    citation: 'Centers for Disease Control and Prevention (CDC). Behavioral Risk Factor Surveillance System (BRFSS), 2015.',
+    description: 'Large-scale epidemiological dataset comprising 253,680 survey respondents and 21 clinical, demographic, and lifestyle indicators assessing diabetes diagnosis risk.',
+    file_format: 'CSV',
+    row_count: 253680,
+    column_count: 23,
+    features: [
+      'HighBP', 'HighChol', 'CholCheck', 'BMI', 'Smoker', 'Stroke',
+      'HeartDiseaseorAttack', 'PhysActivity', 'Fruits', 'Veggies',
+      'HvyAlcoholConsump', 'AnyHealthcare', 'NoDocbcCost', 'GenHlth',
+      'MentHlth', 'PhysHlth', 'DiffWalk', 'Sex', 'Age', 'Education', 'Income'
+    ],
+    target_candidates: ['Diabetes_binary'],
+    default_target: 'Diabetes_binary',
+    target_encodings: {
+      'Diabetes_binary': '0=No diabetes, 1=Prediabetes or Diabetes'
+    },
+    identifier_columns: ['ID'],
+    has_missing_values: false,
+    missing_summary: {},
+    suitable_tasks: ['classification', 'eda'],
+    supports_multiclass: false,
+    supports_binary: true,
+    supports_regression: false,
+    relative_path: 'data/processed/diabetes/cdc_diabetes_indicators.csv',
+    sha256: 'c75c2d1fd66c86883e996a80977ae0eea83e1a1b56d39272c1abcea46574afcb',
+    status: 'ready',
+    is_medical: true,
+    is_dmbi_benchmark: false
+  },
+  {
+    id: 'breast-cancer-wisconsin',
+    name: 'Breast Cancer Wisconsin (Diagnostic)',
+    domain: 'Oncology',
+    category: 'oncology',
+    source: 'UCI Machine Learning Repository',
+    source_id: 17,
+    source_url: 'https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic',
+    license: 'Creative Commons Attribution 4.0 International (CC BY 4.0)',
+    citation: 'Street, W.N., Wolberg, W.H., & Mangasarian, O.L. (1993). Nuclear feature extraction for breast tumor diagnosis. IS&T/SPIE 1905, 861-870.',
+    description: '569 digitized fine needle aspirate (FNA) cell nucleus measurements with 30 continuous real-valued morphometric descriptors predicting malignancy (M vs B).',
+    file_format: 'CSV',
+    row_count: 569,
+    column_count: 32,
+    features: [
+      'radius1', 'texture1', 'perimeter1', 'area1', 'smoothness1',
+      'compactness1', 'concavity1', 'concave_points1', 'symmetry1', 'fractal_dimension1',
+      'radius2', 'texture2', 'perimeter2', 'area2', 'smoothness2',
+      'compactness2', 'concavity2', 'concave_points2', 'symmetry2', 'fractal_dimension2',
+      'radius3', 'texture3', 'perimeter3', 'area3', 'smoothness3',
+      'compactness3', 'concavity3', 'concave_points3', 'symmetry3', 'fractal_dimension3'
+    ],
+    target_candidates: ['Diagnosis'],
+    default_target: 'Diagnosis',
+    target_encodings: {
+      'Diagnosis': 'M=Malignant, B=Benign'
+    },
+    identifier_columns: ['ID'],
+    has_missing_values: false,
+    missing_summary: {},
+    suitable_tasks: ['classification', 'clustering', 'eda'],
+    supports_multiclass: false,
+    supports_binary: true,
+    supports_regression: false,
+    relative_path: 'data/processed/breast_cancer/breast_cancer_diagnostic.csv',
+    sha256: '422f6c34b82c0bbc32115cdf3397f8dd3d3fc183eda5e9bb6b525140acf90eab',
+    status: 'ready',
+    is_medical: true,
+    is_dmbi_benchmark: false
+  },
+  {
+    id: 'chronic-kidney-disease',
+    name: 'Chronic Kidney Disease',
+    domain: 'Nephrology',
+    category: 'nephrology',
+    source: 'UCI Machine Learning Repository',
+    source_id: 336,
+    source_url: 'https://archive.ics.uci.edu/dataset/336/chronic+kidney+disease',
+    license: 'Creative Commons Attribution 4.0 International (CC BY 4.0)',
+    citation: 'Rubini, L., Soundarapandian, P., & Eswaran, P. (2015). Chronic Kidney Disease Dataset. Apollo Hospitals, Tamil Nadu, India. UCI Machine Learning Repository.',
+    description: '400 patient records across 24 clinical parameters (blood pressure, serum creatinine, urea, hemoglobin) diagnosing chronic kidney disease with extensive missingness and mixed types.',
+    file_format: 'CSV',
+    row_count: 400,
+    column_count: 25,
+    features: [
+      'age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'pcc', 'ba', 'bgr',
+      'bu', 'sc', 'sod', 'pot', 'hemo', 'pcv', 'wbcc', 'rbcc', 'htn',
+      'dm', 'cad', 'appet', 'pe', 'ane'
+    ],
+    target_candidates: ['class'],
+    default_target: 'class',
+    target_encodings: {
+      'class': 'ckd=Chronic Kidney Disease, notckd=Not Chronic Kidney Disease'
+    },
+    has_missing_values: true,
+    missing_summary: {
+      age: 9, bp: 12, sg: 47, al: 46, su: 49, rbc: 152, pc: 65, pcc: 4,
+      ba: 4, bgr: 44, bu: 19, sc: 17, sod: 87, pot: 88, hemo: 52, pcv: 71,
+      wbcc: 106, rbcc: 131, htn: 2, dm: 2, cad: 2, appet: 1, pe: 1, ane: 1
+    },
+    suitable_tasks: ['classification', 'eda'],
+    supports_multiclass: false,
+    supports_binary: true,
+    supports_regression: false,
+    relative_path: 'data/processed/kidney_disease/chronic_kidney_disease.csv',
+    sha256: '962bc6d7026f443c6041dbe1c33416fc6d40f1953a60758b35a72a9f3124f6ed',
+    status: 'ready',
+    is_medical: true,
+    is_dmbi_benchmark: false
+  },
+  {
+    id: 'maternal-health-risk',
+    name: 'Maternal Health Risk',
+    domain: 'Obstetrics & Maternal Health',
+    category: 'obstetrics',
+    source: 'UCI Machine Learning Repository',
+    source_id: 863,
+    source_url: 'https://archive.ics.uci.edu/dataset/863/maternal+health+risk',
+    license: 'Creative Commons Attribution 4.0 International (CC BY 4.0)',
+    citation: 'Ahmed, M., Kashem, M.A., Rahman, M., & Khatun, S. (2020). Review and Analysis of Risk Factor of Maternal Health in Remote Area Using IoT in the Context of Bangladesh. Int. J. Adv. Comput. Sci. Appl.',
+    description: '1,014 records assessing pregnancy and maternal health risk across 6 vital physiological markers (Systolic BP, Diastolic BP, Blood Sugar, Body Temp, Heart Rate, Age) categorized into 3 clinical risk strata (low, mid, high).',
+    file_format: 'CSV',
+    row_count: 1014,
+    column_count: 7,
+    features: [
+      'Age', 'SystolicBP', 'DiastolicBP', 'BS', 'BodyTemp', 'HeartRate'
+    ],
+    target_candidates: ['RiskLevel'],
+    default_target: 'RiskLevel',
+    target_encodings: {
+      'RiskLevel': 'low risk, mid risk, high risk (ordered clinical risk strata)'
+    },
+    has_missing_values: false,
+    missing_summary: {},
+    suitable_tasks: ['classification', 'eda'],
+    supports_multiclass: true,
+    supports_binary: false,
+    supports_regression: false,
+    relative_path: 'data/processed/maternal_health/maternal_health_risk.csv',
+    sha256: 'c4341bc18c0beffb232f843a256ab4f90f7d25cdb0565e4656b4f7813765cb03',
+    status: 'ready',
+    is_medical: true,
+    is_dmbi_benchmark: false
+  }
+];

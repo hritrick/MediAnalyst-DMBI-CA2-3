@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DatasetMeta, DatasetProfile } from '../types';
 import { Card } from '../components/common/Card';
 import { StatCard } from '../components/common/StatCard';
@@ -11,7 +12,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Database,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Library,
+  ArrowRight
 } from 'lucide-react';
 
 interface DatasetsPageProps {
@@ -33,6 +36,7 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
   onLoadExample,
   onSelectDataset
 }) => {
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -89,6 +93,30 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Official Datasets Callout */}
+      <div className="bg-forest-50/70 rounded-lg border border-forest-200/80 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-forest-100 flex items-center justify-center text-forest-700 shrink-0">
+            <Library className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-forest-900">
+              Official Scientific Medical Datasets Library
+            </div>
+            <div className="text-[11px] text-forest-700">
+              Browse and one-click load Cleveland Heart Disease, CDC Diabetes (253,680 records), Breast Cancer Wisconsin, Chronic Kidney Disease, and Maternal Health Risk.
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => navigate('/library')}
+          className="px-4 py-2 rounded-md bg-forest-700 text-white text-xs font-semibold hover:bg-forest-800 transition-colors flex items-center gap-1.5 shrink-0 self-start sm:self-auto shadow-sm"
+        >
+          <span>Open Dataset Library</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
       {/* Upload Zone & Cleveland Benchmark Action */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Drag and Drop Upload Box */}

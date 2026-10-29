@@ -14,6 +14,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   const getPageTitle = (path: string) => {
     switch (path) {
+      case '/library': return { title: 'Official Medical Dataset Library', breadcrumb: 'Dataset Catalog' };
       case '/':
       case '/datasets': return { title: 'Datasets & Profiling', breadcrumb: 'Data Ingestion' };
       case '/exploration': return { title: 'Exploratory Clinical Data Analysis', breadcrumb: 'Data Exploration' };

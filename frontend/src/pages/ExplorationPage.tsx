@@ -6,6 +6,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { DistributionChart } from '../components/charts/DistributionChart';
 import { CorrelationHeatmap } from '../components/charts/CorrelationHeatmap';
+import { BivariateScatterExplorer } from '../components/charts/BivariateScatterExplorer';
 import { HeartDiseaseCohortViewer } from '../components/charts/HeartDiseaseCohortViewer';
 import {
   BarChart2,
@@ -140,7 +141,19 @@ export const ExplorationPage: React.FC<ExplorationPageProps> = ({
         </Card>
       )}
 
-      {/* 4. Categorical Attributes Breakdown */}
+      {/* 4. Interactive Bivariate Scatter & Clinical Trend Explorer */}
+      <Card
+        title="Interactive Bivariate Scatter & Clinical Trend Explorer"
+        subtitle="Examine empirical cross-feature relationships, risk thresholds, and stratified disease distributions"
+      >
+        <BivariateScatterExplorer
+          columns={profile.columns}
+          previewRows={profile.preview_rows}
+          isClevelandHeartDisease={profile.is_cleveland_heart_disease}
+        />
+      </Card>
+
+      {/* 5. Categorical Attributes Breakdown */}
       {categoricalColumns.length > 0 && (
         <Card
           title="Categorical & Discrete Variable Frequencies"

@@ -10,6 +10,7 @@ import {
 import * as api from './services/api';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
+import { DatasetLibraryPage } from './pages/DatasetLibraryPage';
 import { DatasetsPage } from './pages/DatasetsPage';
 import { ExplorationPage } from './pages/ExplorationPage';
 import { AnalysisPage } from './pages/AnalysisPage';
@@ -108,6 +109,20 @@ export function AppContent() {
     }
   };
 
+  const handleLoadCatalogDataset = async (datasetId: string) => {
+    try {
+      setIsLoadingProfile(true);
+      const meta = await api.loadCatalogDataset(datasetId);
+      await refreshDatasets();
+      await selectDataset(meta.dataset_id);
+    } catch (e) {
+      console.error('Failed to load catalog dataset:', e);
+      throw e;
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
   const handleRunAnalysis = async (req: AnalysisRequest) => {
     if (!activeDatasetId) return;
     try {
@@ -143,7 +158,17 @@ export function AppContent() {
         {/* Scrollable Page Body */}
         <main className="flex-1 overflow-y-auto px-8 py-8">
           <Routes>
-            <Route path="/" element={<Navigate to="/datasets" replace />} />
+            <Route path="/" element={<Navigate to="/library" replace />} />
+            <Route
+              path="/library"
+              element={
+                <DatasetLibraryPage
+                  activeDatasetId={activeDatasetId}
+                  onSelectDataset={selectDataset}
+                  onLoadCatalogDataset={handleLoadCatalogDataset}
+                />
+              }
+            />
             <Route
               path="/datasets"
               element={

@@ -14,6 +14,7 @@ import {
   CLEVELAND_RECOMMENDATIONS,
   CLEVELAND_ANALYSIS
 } from '../data/clevelandBenchmarkData';
+import { OFFICIAL_CATALOG_DATA } from '../data/catalogFallbackData';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -58,23 +59,54 @@ export async function getDatasets(): Promise<DatasetMeta[]> {
 
 export async function getDatasetCatalog(): Promise<DatasetCatalogItem[]> {
   try {
-    const res = await fetch(`${API_BASE}/datasets/catalog`, { signal: AbortSignal.timeout(3000) });
-    if (res.ok) return await res.json();
+    const res = await fetch(`${API_BASE}/datasets/catalog`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+    }
   } catch (e) {
-    // Offline
+    // Offline / standalone fallback
   }
-  return [];
+  return OFFICIAL_CATALOG_DATA;
 }
 
 export async function loadCatalogDataset(datasetId: string): Promise<DatasetMeta> {
   try {
     const res = await fetch(`${API_BASE}/datasets/catalog/${datasetId}/load`, {
       method: 'POST',
-      signal: AbortSignal.timeout(4000),
+      signal: AbortSignal.timeout(10000),
     });
-    if (res.ok) return await res.json();
-  } catch (e) {}
-  return CLEVELAND_META;
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.info(`Backend unavailable on Vercel, loading fallback for catalog item ${datasetId}`);
+  }
+
+  // Fallback for standalone/client-side mode
+  const catalogItem = OFFICIAL_CATALOG_DATA.find((item) => item.id === datasetId);
+  if (datasetId === 'heart-disease' || datasetId === 'cleveland-heart' || !catalogItem) {
+    clientDatasetsMap.set('cleveland-heart', {
+      meta: CLEVELAND_META,
+      profile: CLEVELAND_PROFILE,
+      rawRows: CLEVELAND_PROFILE.preview_rows
+    });
+    return CLEVELAND_META;
+  }
+
+  const fallbackMeta: DatasetMeta = {
+    dataset_id: catalogItem.id,
+    filename: catalogItem.name,
+    row_count: catalogItem.row_count,
+    column_count: catalogItem.column_count,
+    uploaded_at: new Date().toISOString(),
+    file_size_bytes: catalogItem.row_count * catalogItem.column_count * 8,
+    is_example: true,
+    notes: catalogItem.description
+  };
+  return fallbackMeta;
 }
 
 export async function loadHeartDiseaseExample(): Promise<DatasetMeta> {
