@@ -16,8 +16,7 @@ import {
   ChevronDown,
   Plus,
   Trash2,
-  SlidersHorizontal,
-  Info
+  SlidersHorizontal
 } from 'lucide-react';
 
 interface LivePredictorProps {
@@ -489,14 +488,6 @@ export const LivePredictor: React.FC<LivePredictorProps> = ({ analysis, profile 
               </button>
             )}
           </div>
-        </div>
-
-        {/* Informative Note for Evaluators / Viva */}
-        <div className="p-3 bg-warmbg/40 border border-lineborder rounded-md flex items-center gap-2 text-xs text-subtext">
-          <Info className="w-4 h-4 text-forest-700 shrink-0" />
-          <span>
-            <b>Professor / Examiner tip:</b> You only need to input the parameters you know or want to test. Unspecified parameters automatically adopt the dataset's verified median baseline to ensure mathematically sound model predictions.
-          </span>
         </div>
 
         {/* Prediction Submit Button */}
