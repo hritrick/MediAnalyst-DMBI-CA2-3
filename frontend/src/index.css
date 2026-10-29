@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
   body {
     background-color: #F6F7F5;
@@ -9,7 +10,13 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+
+  ::selection {
+    background-color: #DCE7E1;
+    color: #202A32;
+  }
 }
+
 
 /* Custom scrollbars for clean research look */
 ::-webkit-scrollbar {
